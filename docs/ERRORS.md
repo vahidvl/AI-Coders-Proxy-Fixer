@@ -7,9 +7,7 @@ If you're reading this, chances are you hit a wall trying to get your favorite A
 ## 1. Geoblocking & Cloud Code Limitations (Iran, Russia, etc.)
 
 ### Error: `User location is not supported for the API use.`
-<div align="center">
-  <img src="../assets/location_error.jpg" alt="User Location Not Supported" width="600"/>
-</div>
+
 
 ```text
 Trajectory ID: 7fdeb8bf-c78d-4138-8ff1-ea897ffcad68
@@ -34,7 +32,7 @@ Headers: {"Alt-Svc":["h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"],"Cont
 
 ### Error: `Unexpected issue setting up your account (EOF)`
 <div align="center">
-  <img src="../assets/cloudcode_eof.jpg" alt="CloudCode EOF Error" width="600"/>
+  <img src="../assets/cloudcode_eof.png" alt="CloudCode EOF Error" width="600"/>
 </div>
 
 ```text
@@ -50,7 +48,7 @@ Post "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": EOF
 
 ### Error: `Agent terminated due to error`
 <div align="center">
-  <img src="../assets/agent_terminated.jpg" alt="Agent Terminated Error" width="600"/>
+  <img src="../assets/agent_terminated.png" alt="Agent Terminated Error" width="600"/>
 </div>
 
 ```text
