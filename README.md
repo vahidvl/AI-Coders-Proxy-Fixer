@@ -1,4 +1,4 @@
-# 🚀 AI Coders Proxy Fixer
+<h1 align="center">🚀 AI Coders Proxy Fixer</h1>
 <div align="center">
   <img src="https://img.shields.io/badge/OS-Windows-blue" alt="Windows"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>

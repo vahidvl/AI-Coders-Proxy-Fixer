@@ -1,4 +1,4 @@
-# 🚀 مدیریت پروکسی برای دستیارهای برنامه‌نویسی (AI Coders Proxy Fixer)
+<h1 align="center">🚀 مدیریت پروکسی برای دستیارهای برنامه‌نویسی (AI Coders Proxy Fixer)</h1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/OS-Windows-blue" alt="Windows"/>
