@@ -7,7 +7,17 @@ If you're reading this, chances are you hit a wall trying to get your favorite A
 ## 1. Geoblocking & Cloud Code Limitations (Iran, Russia, etc.)
 
 ### Error: `User location is not supported for the API use.`
-```json
+<div align="center">
+  <img src="../assets/location_error.jpg" alt="User Location Not Supported" width="600"/>
+</div>
+
+```text
+Trajectory ID: 7fdeb8bf-c78d-4138-8ff1-ea897ffcad68
+Error: HTTP 400 Bad Request
+Sherlog: 
+TraceID: ////////////////////////
+Headers: {"Alt-Svc":["h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"],"Content-Length":["140"],"Content-Type":["text/event-stream"],"Date":["Tue, 07 Jul 2026 22:50:14 GMT"],"Server":["ESF"],"Server-Timing":["gfet4t7; dur=1341"],"Vary":["Origin","X-Origin","Referer"],"X-Cloudaicompanion-Trace-Id":["5fc66af9dd41aaf3"],"X-Content-Type-Options":["nosniff"],"X-Frame-Options":["SAMEORIGIN"],"X-Xss-Protection":["0"]}
+
 {
   "error": {
     "code": 400,
@@ -23,6 +33,10 @@ If you're reading this, chances are you hit a wall trying to get your favorite A
 ---
 
 ### Error: `Unexpected issue setting up your account (EOF)`
+<div align="center">
+  <img src="../assets/cloudcode_eof.jpg" alt="CloudCode EOF Error" width="600"/>
+</div>
+
 ```text
 There was an unexpected issue setting up your account.
 Post "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": EOF
@@ -35,6 +49,10 @@ Post "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": EOF
 ---
 
 ### Error: `Agent terminated due to error`
+<div align="center">
+  <img src="../assets/agent_terminated.jpg" alt="Agent Terminated Error" width="600"/>
+</div>
+
 ```text
 Agent terminated due to error. You can prompt the model to try again or start a new conversation if the error persists.
 ```
