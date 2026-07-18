@@ -1,8 +1,10 @@
 # 🚀 AI Coders Proxy Fixer
 <div align="center">
-<b>![Windows](https://img.shields.io/badge/OS-Windows-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Portable](https://img.shields.io/badge/Portable-Yes-success) ![Status](https://img.shields.io/badge/Status-Active-brightgreen)</b>
-</div>
-<div align="center">
+  <img src="https://img.shields.io/badge/OS-Windows-blue" alt="Windows"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
+  <img src="https://img.shields.io/badge/Portable-Yes-success" alt="Portable"/>
+  <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status"/>
+  <br/><br/>
   <b><a href="README_fa.md">🇮🇷 مطالعه به زبان فارسی (Read in Persian)</a></b>
 </div>
 

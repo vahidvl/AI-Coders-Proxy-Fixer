@@ -1,8 +1,11 @@
 # 🚀 مدیریت پروکسی برای دستیارهای برنامه‌نویسی (AI Coders Proxy Fixer)
 
-![Windows](https://img.shields.io/badge/OS-Windows-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Portable](https://img.shields.io/badge/Portable-Yes-success) ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-
 <div align="center">
+  <img src="https://img.shields.io/badge/OS-Windows-blue" alt="Windows"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License"/>
+  <img src="https://img.shields.io/badge/Portable-Yes-success" alt="Portable"/>
+  <img src="https://img.shields.io/badge/Status-Active-brightgreen" alt="Status"/>
+  <br/><br/>
   <b><a href="README.md">🇺🇸 Read in English</a></b>
 </div>
 
