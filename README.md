@@ -2,6 +2,10 @@
 
 ![Windows](https://img.shields.io/badge/OS-Windows-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Portable](https://img.shields.io/badge/Portable-Yes-success) ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
+<div align="center">
+  <b><a href="README_fa.md">🇮🇷 مطالعه به زبان فارسی (Read in Persian)</a></b>
+</div>
+
 > A lightweight, open-source proxy manager designed specifically to resolve geoblocking, network timeouts, and corporate firewall restrictions for modern AI coding assistants.
 
 ⭐️ **If this tool saves you hours of debugging, please consider giving it a STAR! It helps other developers discover this solution.** ⭐️

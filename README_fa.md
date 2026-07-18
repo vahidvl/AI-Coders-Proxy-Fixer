@@ -2,6 +2,10 @@
 
 ![Windows](https://img.shields.io/badge/OS-Windows-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Portable](https://img.shields.io/badge/Portable-Yes-success) ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
+<div align="center">
+  <b><a href="README.md">🇺🇸 Read in English</a></b>
+</div>
+
 > یک ابزار متن‌باز، سبک و کاملاً پرتابل برای دور زدن محدودیت‌های جغرافیایی، فایروال‌های شرکتی و رفع خطاهای اتصال در دستیارهای هوش مصنوعی مانند Claude Code، Antigravity IDE، Cursor، OpenAI Codex و VS Code.
 
 ⭐️ **اگر این ابزار مشکل شما را حل کرد، لطفاً به این ریپازیتوری استار (STAR ⭐) بدهید تا سایر توسعه‌دهندگان نیز بتوانند آن را پیدا کنند!** ⭐️
