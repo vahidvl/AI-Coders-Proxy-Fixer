@@ -26,7 +26,8 @@
 - ❌ **توقف ایجنت:** از کار افتادن ایجنت‌های خودکار در حین تولید کد
 
 <div align="center">
-  <img src="assets/error_sample.jpg" alt="نمونه خطای تحریم" width="500"/>
+  <img src="assets/agent_terminated.png" alt="کرش ایجنت" width="48%"/>
+  <img src="assets/cloudcode_eof.png" alt="ارور کلود کد" width="48%"/>
 </div>
 
 ## 🎯 راه‌حل

@@ -26,7 +26,8 @@ This results in frustrating errors such as:
 - ❌ Unresponsive Autonomous Agents
 
 <div align="center">
-  <img src="assets/error_sample.jpg" alt="Error Screenshot" width="500"/>
+  <img src="assets/agent_terminated.png" alt="Agent Terminated Error" width="48%"/>
+  <img src="assets/cloudcode_eof.png" alt="CloudCode EOF Error" width="48%"/>
 </div>
 
 ## 🎯 The Solution
