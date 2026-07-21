@@ -18,6 +18,12 @@ def ensure_single_instance():
     ERROR_ALREADY_EXISTS = 183
 
     try:
+        # Set AppUserModelID so Windows Taskbar uses our custom app icon
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("AICodersProxyFixer.App.v2")
+    except Exception:
+        pass
+
+    try:
         kernel32 = ctypes.windll.kernel32
         mutex = kernel32.CreateMutexW(None, False, MUTEX_NAME)
         last_error = kernel32.GetLastError()
@@ -405,14 +411,46 @@ class ProxyManagerApp(ctk.CTk):
         )
         info_label.pack(side="right")
 
-    def generate_icon(self, color1, color2):
+        self.setup_ui()
+        self.setup_icon()
+        self.setup_tray()
+        self.rescan_targets()
+
+    def setup_icon(self):
+        icon_path = Path(__file__).parent.parent / "assets" / "app_icon.ico"
+        if not icon_path.exists() and getattr(sys, 'frozen', False):
+            icon_path = Path(sys._MEIPASS) / "assets" / "app_icon.ico"
+        if icon_path.exists():
+            try:
+                self.iconbitmap(str(icon_path))
+            except Exception:
+                pass
+
+    def generate_icon(self, is_enabled: bool):
+        icon_path = Path(__file__).parent.parent / "assets" / "app_icon.ico"
+        if not icon_path.exists() and getattr(sys, 'frozen', False):
+            icon_path = Path(sys._MEIPASS) / "assets" / "app_icon.ico"
+
+        if icon_path.exists():
+            try:
+                base_img = Image.open(str(icon_path)).convert('RGBA').resize((64, 64))
+                dc = ImageDraw.Draw(base_img)
+                dot_color = (0, 230, 118, 255) if is_enabled else (255, 82, 82, 255)
+                dc.ellipse((44, 44, 60, 60), fill=dot_color, outline=(18, 18, 26, 255), width=2)
+                return base_img
+            except Exception:
+                pass
+
+        # Fallback if icon fails to load
+        color1 = (18, 18, 26)
+        color2 = (0, 230, 118) if is_enabled else (255, 82, 82)
         image = Image.new('RGB', (64, 64), color1)
         dc = ImageDraw.Draw(image)
         dc.rectangle((16, 16, 48, 48), fill=color2)
         return image
 
     def setup_tray(self):
-        icon_image = self.generate_icon('black', 'green' if self.is_proxy_enabled else 'red')
+        icon_image = self.generate_icon(self.is_proxy_enabled)
         menu = (
             item('Show Window', self.show_window),
             item('Toggle Proxy', self.tray_toggle_proxy),
@@ -504,12 +542,10 @@ class ProxyManagerApp(ctk.CTk):
         if self.is_proxy_enabled:
             self.live_pulse_label.configure(text="● ONLINE", text_color="#00E676")
             self.toggle_btn.configure(text="🔴 Disable All Proxies", fg_color="#D32F2F", hover_color="#B71C1C")
-            new_icon = self.generate_icon('black', 'green')
         else:
             self.live_pulse_label.configure(text="○ OFFLINE", text_color="#FF5252")
             self.toggle_btn.configure(text="🟢 Enable & Patch All Proxies", fg_color="#2E7D32", hover_color="#1B5E20")
-            new_icon = self.generate_icon('black', 'red')
-        self.tray_icon.icon = new_icon
+        self.tray_icon.icon = self.generate_icon(self.is_proxy_enabled)
 
     def test_latency(self):
         for card in self.lat_cards.values():
