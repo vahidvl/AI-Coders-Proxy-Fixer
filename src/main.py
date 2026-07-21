@@ -145,7 +145,7 @@ class ProxyManagerApp(ctk.CTk):
         super().__init__()
 
         self.title("AI Coders Proxy Fixer v2.0 - Futuristic Dashboard")
-        self.geometry("660x760")
+        self.geometry("660x840")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.hide_window)
 
@@ -351,7 +351,7 @@ class ProxyManagerApp(ctk.CTk):
         )
         rescan_btn.pack(side="right")
 
-        self.targets_container = ctk.CTkScrollableFrame(main_content, height=200, corner_radius=10, fg_color="#12121A", border_width=1, border_color="#2A2A3C")
+        self.targets_container = ctk.CTkScrollableFrame(main_content, height=260, corner_radius=10, fg_color="#12121A", border_width=1, border_color="#2A2A3C")
         self.targets_container.pack(fill="x", pady=5)
 
         # 6. Footer Options
