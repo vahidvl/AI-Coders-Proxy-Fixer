@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [2.0.1] - 2026-07-21 🎨 (Futuristic Dashboard UI Overhaul)
+
+### 🎨 UI & Aesthetics
+- **Futuristic AI Dashboard:** Redesigned CustomTkinter interface to match high-tech futuristic AI aesthetics with deep dark background (`#12121A`), neon indicators, and rounded target cards.
+- **Top Summary Stat Cards:** Live stat counters for `SCANNED` targets, `PATCHED` active targets, and `ACTIVE PORT`.
+- **Individual Latency Cards:** Separate latency status cards for **Google**, **Claude API**, and **Cloud Code API** with color-coded response times (green `<150ms`, yellow, red).
+- **Target Icons:** Added distinct visual icons for each detected target (Antigravity IDE 🚀, VS Code 🟦, Cursor 🔮, PowerShell ⚡, Git Bash 🐚, Claude CLI 🤖).
+- **Live Status Pulse:** Header banner with live `● ONLINE` / `○ OFFLINE` indicator.
+
+### 📦 Build
+- Updated standalone executable (`dist/main/main.exe`) built with PyInstaller.
+
+---
+
 ## [2.0.0] - 2026-07-21 🚀 (Super Upgrade)
 
 ### ✨ Added
@@ -22,10 +36,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a `Path` attribute error in `proxy_core.py` when evaluating string paths for IDE settings.
 - Fixed local OAuth redirect callback loops by optimizing `ProxyOverride` exceptions (`<local>;127.0.0.1;localhost;::1`).
 - Fixed system tray window state synchronization issues.
-
-### 🎨 Changed
-- Redesigned CustomTkinter Dashboard UI with modern dark mode aesthetic, scrollable target cards, latency badges, and updated window dimensions (`620x720`).
-- Updated `README.md` and `README_fa.md` with v2.0 feature showcase, badges, and documentation.
 
 ---
 
