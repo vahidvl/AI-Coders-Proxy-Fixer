@@ -27,8 +27,13 @@ class TargetPatcher:
                 return self.patch_bash(config_path)
             elif ".claude.json" in str(config_path):
                 return self.patch_claude_cli(config_path)
+            elif ".copilot-cli" in str(config_path):
+                return self.patch_claude_cli(config_path)
+            elif ".continue" in str(config_path):
+                return self.patch_continue_dev(config_path)
+            elif ".aider.conf.yml" in str(config_path):
+                return self.patch_aider_cli(config_path)
             else:
-                # Default to IDE JSON settings patcher
                 return self.patch_ide(config_path, is_antigravity=("Antigravity" in name or "Antigravity" in str(config_path)))
         except Exception as e:
             return False, f"Failed to patch {name}: {str(e)}"
@@ -41,8 +46,12 @@ class TargetPatcher:
         try:
             if "profile.ps1" in str(config_path) or ".bashrc" in str(config_path):
                 return self.unpatch_shell(config_path)
-            elif ".claude.json" in str(config_path):
+            elif ".claude.json" in str(config_path) or ".copilot-cli" in str(config_path):
                 return self.unpatch_claude_cli(config_path)
+            elif ".continue" in str(config_path):
+                return self.unpatch_continue_dev(config_path)
+            elif ".aider.conf.yml" in str(config_path):
+                return self.unpatch_aider_cli(config_path)
             else:
                 return self.unpatch_ide(config_path, is_antigravity=("Antigravity" in name or "Antigravity" in str(config_path)))
         except Exception as e:
@@ -144,7 +153,7 @@ class TargetPatcher:
         data['httpProxy'] = self.full_proxy_url
         data['httpsProxy'] = self.full_proxy_url
         config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
-        return True, "Successfully patched Claude Code CLI config"
+        return True, f"Successfully patched {config_path.name}"
 
     def unpatch_claude_cli(self, config_path: Path) -> Tuple[bool, str]:
         if not config_path.exists():
@@ -155,6 +164,51 @@ class TargetPatcher:
             data.pop('httpProxy', None)
             data.pop('httpsProxy', None)
             config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
-            return True, "Successfully unpatched Claude Code CLI config"
+            return True, f"Successfully unpatched {config_path.name}"
         except Exception as e:
-            return False, f"Failed to unpatch Claude CLI: {str(e)}"
+            return False, f"Failed to unpatch: {str(e)}"
+
+    def patch_continue_dev(self, config_path: Path) -> Tuple[bool, str]:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        data = {}
+        if config_path.exists():
+            try:
+                data = json.loads(config_path.read_text(encoding='utf-8'))
+            except Exception:
+                pass
+
+        if "requestOptions" not in data:
+            data["requestOptions"] = {}
+        data["requestOptions"]["proxy"] = self.full_proxy_url
+        config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
+        return True, "Successfully patched Continue.dev AI config"
+
+    def unpatch_continue_dev(self, config_path: Path) -> Tuple[bool, str]:
+        if not config_path.exists():
+            return True, "Config file does not exist."
+
+        try:
+            data = json.loads(config_path.read_text(encoding='utf-8'))
+            if "requestOptions" in data:
+                data["requestOptions"].pop("proxy", None)
+            config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
+            return True, "Successfully unpatched Continue.dev AI config"
+        except Exception as e:
+            return False, f"Failed to unpatch Continue.dev: {str(e)}"
+
+    def patch_aider_cli(self, config_path: Path) -> Tuple[bool, str]:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        content = config_path.read_text(encoding='utf-8') if config_path.exists() else ""
+        lines = [line for line in content.splitlines() if not (BLOCK_BEGIN in line or BLOCK_END in line or "http-proxy:" in line or "https-proxy:" in line)]
+        block = f"{BLOCK_BEGIN}\nhttp-proxy: {self.full_proxy_url}\nhttps-proxy: {self.full_proxy_url}\n{BLOCK_END}"
+        new_content = "\n".join(lines).strip() + "\n\n" + block + "\n"
+        config_path.write_text(new_content, encoding='utf-8')
+        return True, "Successfully patched Aider AI CLI config"
+
+    def unpatch_aider_cli(self, config_path: Path) -> Tuple[bool, str]:
+        if not config_path.exists():
+            return True, "Config file does not exist."
+        content = config_path.read_text(encoding='utf-8')
+        lines = [line for line in content.splitlines() if not (BLOCK_BEGIN in line or BLOCK_END in line or "http-proxy:" in line or "https-proxy:" in line)]
+        config_path.write_text("\n".join(lines).strip() + "\n", encoding='utf-8')
+        return True, "Successfully unpatched Aider AI CLI config"

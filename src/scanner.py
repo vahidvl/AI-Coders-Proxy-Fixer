@@ -71,6 +71,7 @@ class ScannerEngine:
             ("Antigravity IDE", base / "Antigravity IDE" / "User" / "settings.json"),
             ("VS Code", base / "Code" / "User" / "settings.json"),
             ("Cursor", base / "Cursor" / "User" / "settings.json"),
+            ("Windsurf IDE", base / "Windsurf" / "User" / "settings.json"),
             ("Void Editor", base / "Void" / "User" / "settings.json"),
             ("VS Code Insiders", base / "Code - Insiders" / "User" / "settings.json"),
             ("Sublime Text", base / "Sublime Text" / "Packages" / "User" / "Preferences.sublime-settings"),
@@ -191,6 +192,75 @@ class ScannerEngine:
             is_installed=is_installed,
             is_patched=is_patched,
             details=details
+        ))
+
+        # 2. OpenAI Codex / Copilot CLI Config
+        codex_cfg = user_dir / ".copilot-cli" / "config.json"
+        codex_installed = codex_cfg.parent.exists() or codex_cfg.exists()
+        codex_patched = False
+        codex_details = "Installed" if codex_installed else "Not found"
+        if codex_cfg.exists():
+            try:
+                data = json.loads(codex_cfg.read_text(encoding='utf-8'))
+                if "httpProxy" in data or "proxy" in data:
+                    codex_patched = True
+                    codex_details = "Patched"
+            except Exception:
+                pass
+
+        clis.append(DetectedTarget(
+            name="OpenAI Codex / Copilot CLI",
+            target_type=TargetType.CLI,
+            config_path=codex_cfg if codex_installed else None,
+            is_installed=codex_installed,
+            is_patched=codex_patched,
+            details=codex_details
+        ))
+
+        # 3. Continue.dev Extension Config
+        cont_cfg = user_dir / ".continue" / "config.json"
+        cont_installed = cont_cfg.parent.exists() or cont_cfg.exists()
+        cont_patched = False
+        cont_details = "Installed" if cont_installed else "Not found"
+        if cont_cfg.exists():
+            try:
+                data = json.loads(cont_cfg.read_text(encoding='utf-8'))
+                if "requestOptions" in data and "extraBodyProperties" in data:
+                    cont_patched = True
+                    cont_details = "Patched"
+            except Exception:
+                pass
+
+        clis.append(DetectedTarget(
+            name="Continue.dev AI Extension",
+            target_type=TargetType.CLI,
+            config_path=cont_cfg if cont_installed else None,
+            is_installed=cont_installed,
+            is_patched=cont_patched,
+            details=cont_details
+        ))
+
+        # 4. Aider AI Coding CLI
+        aider_cfg = user_dir / ".aider.conf.yml"
+        aider_installed = aider_cfg.exists()
+        aider_patched = False
+        aider_details = "Installed" if aider_installed else "Not found"
+        if aider_cfg.exists():
+            try:
+                content = aider_cfg.read_text(encoding='utf-8')
+                if "http-proxy" in content or "https-proxy" in content:
+                    aider_patched = True
+                    aider_details = "Patched"
+            except Exception:
+                pass
+
+        clis.append(DetectedTarget(
+            name="Aider AI CLI",
+            target_type=TargetType.CLI,
+            config_path=aider_cfg if aider_installed else None,
+            is_installed=aider_installed,
+            is_patched=aider_patched,
+            details=aider_details
         ))
 
         return clis
