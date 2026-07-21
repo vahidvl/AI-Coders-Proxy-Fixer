@@ -474,19 +474,26 @@ class ProxyManagerApp(ctk.CTk):
             item('Exit', self.quit_app)
         )
         self.tray_icon = pystray.Icon("AI Proxy", icon_image, "AI Proxy Fixer v2.0", menu)
-
-    def run_tray(self):
-        self.tray_icon.run()
+        try:
+            self.tray_icon.run_detached()
+        except Exception:
+            pass
 
     def hide_window(self):
         self.withdraw()
 
     def show_window(self, icon=None, item=None):
         self.after(0, self.deiconify)
+        self.after(0, self.lift)
+        self.after(0, self.focus_force)
 
     def quit_app(self, icon=None, item=None):
-        self.tray_icon.stop()
+        try:
+            self.tray_icon.stop()
+        except Exception:
+            pass
         self.destroy()
+        sys.exit(0)
 
     def on_preset_change(self, choice):
         if choice in PRESETS:
@@ -642,8 +649,6 @@ class ProxyManagerApp(ctk.CTk):
         close_btn.pack(side="left", padx=5)
 
 if __name__ == "__main__":
-    _app_mutex = ensure_single_instance()
+    ensure_single_instance()
     app = ProxyManagerApp()
-    tray_thread = threading.Thread(target=app.run_tray, daemon=True)
-    tray_thread.start()
     app.mainloop()
