@@ -3,6 +3,7 @@ import sys
 import ctypes
 import threading
 import time
+import webbrowser
 from pathlib import Path
 from PIL import Image, ImageDraw
 import pystray
@@ -220,15 +221,30 @@ class ProxyManagerApp(ctk.CTk):
         badge_box = ctk.CTkFrame(header_content, fg_color="transparent")
         badge_box.pack(side="right")
 
+        badge_row = ctk.CTkFrame(badge_box, fg_color="transparent")
+        badge_row.pack(anchor="e", pady=(0, 4))
+
         ver_badge = ctk.CTkLabel(
-            badge_box,
-            text=" v2.0.0 ",
+            badge_row,
+            text=" v2.1.0 ",
             font=ctk.CTkFont(size=11, weight="bold"),
             fg_color="#311B92",
             text_color="#B388FF",
             corner_radius=6
         )
-        ver_badge.pack(anchor="e", pady=(0, 4))
+        ver_badge.pack(side="left", padx=(0, 6))
+
+        about_btn = ctk.CTkButton(
+            badge_row,
+            text="ℹ️ About",
+            width=65,
+            height=22,
+            fg_color="#2A2A3C",
+            hover_color="#3A3A52",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            command=self.show_about_dialog
+        )
+        about_btn.pack(side="left")
 
         self.live_pulse_label = ctk.CTkLabel(
             badge_box,
@@ -568,6 +584,61 @@ class ProxyManagerApp(ctk.CTk):
     def toggle_autostart(self):
         enable = bool(self.autostart_checkbox.get())
         self.core.set_start_with_windows(enable)
+
+    def show_about_dialog(self):
+        about_win = ctk.CTkToplevel(self)
+        about_win.title("About Developer")
+        about_win.geometry("420x340")
+        about_win.resizable(False, False)
+        about_win.attributes("-topmost", True)
+        about_win.grab_set()
+
+        frame = ctk.CTkFrame(about_win, fg_color="#12121A", corner_radius=12, border_width=1, border_color="#2A2A3C")
+        frame.pack(fill="both", expand=True, padx=15, pady=15)
+
+        title = ctk.CTkLabel(frame, text="⚡ AI Coders Proxy Fixer", font=ctk.CTkFont(size=18, weight="bold"), text_color="#00E5FF")
+        title.pack(pady=(15, 5))
+
+        ver = ctk.CTkLabel(frame, text="v2.1.0 (Super Release)", font=ctk.CTkFont(size=12, weight="bold"), text_color="#B388FF")
+        ver.pack(pady=(0, 15))
+
+        desc = ctk.CTkLabel(
+            frame,
+            text="Automated IDE Patcher & WinInet Proxy Router\nBuilt with ❤️ for developers so they code without borders.",
+            font=ctk.CTkFont(size=11),
+            text_color="#E0E0E0",
+            justify="center"
+        )
+        desc.pack(pady=5)
+
+        dev_label = ctk.CTkLabel(frame, text="👨‍💻 Developer: Vahid Valadi (vahidvl)", font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF")
+        dev_label.pack(pady=(10, 2))
+
+        email_label = ctk.CTkLabel(frame, text="📧 vahidvaladi.mail@gmail.com", font=ctk.CTkFont(size=12), text_color="#8E8EA0")
+        email_label.pack(pady=(0, 15))
+
+        btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        btn_frame.pack(pady=10)
+
+        gh_btn = ctk.CTkButton(
+            btn_frame,
+            text="🌐 GitHub Repository",
+            fg_color="#311B92",
+            hover_color="#4527A0",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            command=lambda: webbrowser.open("https://github.com/vahidvl/AI-Coders-Proxy-Fixer")
+        )
+        gh_btn.pack(side="left", padx=5)
+
+        close_btn = ctk.CTkButton(
+            btn_frame,
+            text="Close",
+            width=80,
+            fg_color="#2A2A3C",
+            hover_color="#3A3A52",
+            command=about_win.destroy
+        )
+        close_btn.pack(side="left", padx=5)
 
 if __name__ == "__main__":
     _app_mutex = ensure_single_instance()
