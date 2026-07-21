@@ -198,6 +198,11 @@ class ProxyManagerApp(ctk.CTk):
         self.rescan_targets()
         print("[DEBUG] Step 8: ProxyManagerApp.__init__ finished", flush=True)
 
+        self.deiconify()
+        self.attributes("-topmost", True)
+        self.after(200, lambda: self.attributes("-topmost", False))
+        self.focus_force()
+
     def setup_ui(self):
         # 1. Header Banner
         header_banner = ctk.CTkFrame(self, fg_color="#12121A", corner_radius=0, height=75)
