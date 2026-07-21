@@ -17,7 +17,7 @@ class ProxyManagerApp(ctk.CTk):
         super().__init__()
         
         self.title("AI Coders Proxy Manager")
-        self.geometry("450x380")
+        self.geometry("450x430")
         self.resizable(False, False)
         
         # Make sure app minimizes to tray when closing
@@ -93,6 +93,25 @@ class ProxyManagerApp(ctk.CTk):
             command=self.toggle_proxy
         )
         self.toggle_btn.pack(pady=10)
+        
+        # Test Connection Button
+        self.test_btn = ctk.CTkButton(
+            self, 
+            text="Test Connection", 
+            fg_color="#1976D2",
+            hover_color="#1565C0",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=35,
+            command=self.test_connection
+        )
+        self.test_btn.pack(pady=(0, 5))
+        
+        self.test_result_label = ctk.CTkLabel(
+            self, 
+            text="", 
+            font=ctk.CTkFont(size=12)
+        )
+        self.test_result_label.pack(pady=(0, 5))
         
         # Info label
         self.info_label = ctk.CTkLabel(
@@ -171,6 +190,34 @@ class ProxyManagerApp(ctk.CTk):
             new_icon = self.generate_icon('black', 'red')
             
         self.tray_icon.icon = new_icon
+
+    def test_connection(self):
+        self.test_result_label.configure(text="Testing proxy connection...", text_color="gray")
+        self.update_idletasks()
+        
+        # Run in thread to not freeze UI
+        threading.Thread(target=self._run_connection_test, daemon=True).start()
+        
+    def _run_connection_test(self):
+        import urllib.request
+        import urllib.error
+        
+        proxy_ip = self.ip_entry.get().strip()
+        proxy_port = self.port_entry.get().strip()
+        proxy_url = f"http://{proxy_ip}:{proxy_port}"
+        
+        try:
+            proxy_handler = urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url})
+            opener = urllib.request.build_opener(proxy_handler)
+            req = urllib.request.Request("https://www.google.com", headers={'User-Agent': 'Mozilla/5.0'})
+            response = opener.open(req, timeout=5)
+            
+            if response.status == 200:
+                self.after(0, lambda: self.test_result_label.configure(text="Connection Successful! 🟢", text_color="green"))
+            else:
+                self.after(0, lambda: self.test_result_label.configure(text=f"Failed (HTTP {response.status}) 🔴", text_color="red"))
+        except Exception as e:
+            self.after(0, lambda: self.test_result_label.configure(text="Proxy Unreachable / Timeout 🔴", text_color="red"))
 
 if __name__ == "__main__":
     app = ProxyManagerApp()

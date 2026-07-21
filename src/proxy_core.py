@@ -155,7 +155,7 @@ class ProxyManagerCore:
                 data['http.noProxy'] = self.no_proxy_array
                 
                 # Antigravity specific language server bypass
-                if "Antigravity IDE" in rel_path.parts:
+                if "Antigravity IDE" in rel_path:
                     if "codeiumDev.languageServerEnv" not in data:
                         data["codeiumDev.languageServerEnv"] = {}
                     data["codeiumDev.languageServerEnv"]["HTTPS_PROXY"] = self.socks_proxy_url
@@ -170,7 +170,7 @@ class ProxyManagerCore:
                 data.pop('http.noProxy', None)
                 data.pop('terminal.integrated.shellIntegration.enabled', None)
                 
-                if "Antigravity IDE" in rel_path.parts and "codeiumDev.languageServerEnv" in data:
+                if "Antigravity IDE" in rel_path and "codeiumDev.languageServerEnv" in data:
                     env = data["codeiumDev.languageServerEnv"]
                     env.pop("HTTPS_PROXY", None)
                     env.pop("HTTP_PROXY", None)
