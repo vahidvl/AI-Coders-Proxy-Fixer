@@ -97,14 +97,18 @@ class ProxyManagerCore:
                 results.append((target.name, ok, msg))
         return results
 
-    def test_api_latency(self) -> Dict[str, Optional[int]]:
+    def test_api_latency(self) -> Dict[str, Tuple[Optional[int], str]]:
         """
-        Test real HTTP/HTTPS round-trip latency (in milliseconds) to AI endpoints via proxy.
+        Test real HTTP/HTTPS round-trip latency and geoblock status to AI coding endpoints through the proxy.
+        Returns: {endpoint_name: (latency_ms, status_label)}
         """
         endpoints = {
-            "Google": "https://www.google.com",
             "Claude API": "https://api.anthropic.com",
-            "Cloud Code API": "https://cloudcode-pa.googleapis.com"
+            "Google Cloud Code": "https://cloudcode-pa.googleapis.com",
+            "Google Gemini": "https://generativelanguage.googleapis.com",
+            "OpenAI / Codex": "https://api.openai.com",
+            "Cursor AI": "https://api2.cursor.sh",
+            "Codeium Backend": "https://web-backend.codeium.com"
         }
         results = {}
         proxy_url = self.full_proxy_url
@@ -116,19 +120,23 @@ class ProxyManagerCore:
             for name, url in endpoints.items():
                 start_time = time.time()
                 try:
-                    req = urllib.request.Request(url, headers={'User-Agent': 'AI-Coders-Proxy-Fixer/1.0'})
-                    with opener.open(req, timeout=4) as response:
+                    req = urllib.request.Request(url, headers={'User-Agent': 'AI-Coders-Proxy-Fixer/2.0'})
+                    with opener.open(req, timeout=3.5) as response:
                         latency_ms = int((time.time() - start_time) * 1000)
-                        results[name] = latency_ms
+                        results[name] = (latency_ms, "OK")
                 except urllib.error.HTTPError as e:
-                    # HTTP 400 or 403 still means network connection was established!
                     latency_ms = int((time.time() - start_time) * 1000)
-                    results[name] = latency_ms
+                    if e.code in [400, 403]:
+                        # Geoblocked or region restricted
+                        results[name] = (latency_ms, "Geoblocked")
+                    else:
+                        # Connected to server (got HTTP response status)
+                        results[name] = (latency_ms, f"HTTP {e.code}")
                 except Exception:
-                    results[name] = None
+                    results[name] = (None, "Timeout")
         except Exception:
             for name in endpoints:
-                results[name] = None
+                results[name] = (None, "Error")
 
         return results
 

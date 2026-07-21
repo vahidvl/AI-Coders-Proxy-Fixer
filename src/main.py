@@ -22,32 +22,34 @@ PRESETS = {
 
 class LatencyCard(ctk.CTkFrame):
     def __init__(self, master, name: str):
-        super().__init__(master, fg_color="#1E1E1E", corner_radius=8, border_width=1, border_color="#333333")
+        super().__init__(master, fg_color="#1E1E2A", corner_radius=8, border_width=1, border_color="#2C2C3E")
         self.name = name
-        
-        self.title_label = ctk.CTkLabel(self, text=name, font=ctk.CTkFont(size=11, weight="bold"), text_color="#AAAAAA")
-        self.title_label.pack(anchor="w", padx=10, pady=(6, 0))
-        
-        self.value_label = ctk.CTkLabel(self, text="-- ms", font=ctk.CTkFont(size=14, weight="bold"), text_color="#00E676")
-        self.value_label.pack(anchor="w", padx=10, pady=(0, 6))
 
-    def set_latency(self, ms):
-        if ms is None:
-            self.value_label.configure(text="Offline 🔴", text_color="#FF5252")
+        self.title_label = ctk.CTkLabel(self, text=name, font=ctk.CTkFont(size=10, weight="bold"), text_color="#9E9EA0")
+        self.title_label.pack(anchor="w", padx=8, pady=(4, 0))
+
+        self.value_label = ctk.CTkLabel(self, text="-- ms", font=ctk.CTkFont(size=12, weight="bold"), text_color="#00E676")
+        self.value_label.pack(anchor="w", padx=8, pady=(0, 4))
+
+    def set_latency_status(self, ms, status):
+        if status == "Timeout" or ms is None:
+            self.value_label.configure(text="Timeout 🔴", text_color="#FF5252")
+        elif status == "Geoblocked":
+            self.value_label.configure(text=f"{ms}ms 🚫 Blocked", text_color="#FF9100")
         else:
-            color = "#00E676" if ms < 150 else ("#FFD600" if ms < 350 else "#FF9100")
+            color = "#00E676" if ms < 250 else ("#FFD600" if ms < 450 else "#FF9100")
             self.value_label.configure(text=f"{ms} ms ⚡", text_color=color)
 
 class StatCard(ctk.CTkFrame):
     def __init__(self, master, title: str, value: str, icon_str: str, val_color: str = "#00E676"):
         super().__init__(master, fg_color="#1A1A24", corner_radius=8, border_width=1, border_color="#2A2A3C")
-        
+
         self.icon_label = ctk.CTkLabel(self, text=icon_str, font=ctk.CTkFont(size=16))
         self.icon_label.grid(row=0, column=0, rowspan=2, padx=(10, 5), pady=8)
-        
+
         self.title_label = ctk.CTkLabel(self, text=title, font=ctk.CTkFont(size=10, weight="bold"), text_color="#8E8EA0")
         self.title_label.grid(row=0, column=1, sticky="w", padx=5, pady=(6, 0))
-        
+
         self.val_label = ctk.CTkLabel(self, text=value, font=ctk.CTkFont(size=13, weight="bold"), text_color=val_color)
         self.val_label.grid(row=1, column=1, sticky="w", padx=5, pady=(0, 6))
 
@@ -64,7 +66,6 @@ class TargetRowFrame(ctk.CTkFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        # Icon representation based on target name
         icon_symbol = "💻"
         if "Antigravity" in self.target.name:
             icon_symbol = "🚀"
@@ -82,7 +83,6 @@ class TargetRowFrame(ctk.CTkFrame):
         icon_label = ctk.CTkLabel(self, text=icon_symbol, font=ctk.CTkFont(size=16))
         icon_label.pack(side="left", padx=(12, 6), pady=8)
 
-        # Target Name
         name_label = ctk.CTkLabel(
             self,
             text=f"{self.target.name}",
@@ -91,7 +91,6 @@ class TargetRowFrame(ctk.CTkFrame):
         )
         name_label.pack(side="left", padx=4, pady=8)
 
-        # Type Badge
         type_color = "#1E88E5" if self.target.target_type == TargetType.IDE else ("#8E24AA" if self.target.target_type == TargetType.SHELL else "#F57C00")
         type_badge = ctk.CTkLabel(
             self,
@@ -102,7 +101,6 @@ class TargetRowFrame(ctk.CTkFrame):
         )
         type_badge.pack(side="left", padx=6, pady=8)
 
-        # Status Badge
         if not self.target.is_installed:
             status_text = "Not Found"
             status_color = "#37474F"
@@ -122,7 +120,6 @@ class TargetRowFrame(ctk.CTkFrame):
         )
         status_label.pack(side="left", padx=6, pady=8)
 
-        # Action Button
         if self.target.is_installed:
             btn_text = "Unpatch" if self.target.is_patched else "Patch"
             btn_color = "#D32F2F" if self.target.is_patched else "#2E7D32"
@@ -144,8 +141,8 @@ class ProxyManagerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("AI Coders Proxy Fixer v2.0 - Futuristic Dashboard")
-        self.geometry("660x840")
+        self.title("AI Coders Proxy Fixer v2.0 - Real AI Matrix Dashboard")
+        self.geometry("680x880")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.hide_window)
 
@@ -164,7 +161,6 @@ class ProxyManagerApp(ctk.CTk):
         header_content = ctk.CTkFrame(header_banner, fg_color="transparent")
         header_content.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # Logo & App Title
         logo_label = ctk.CTkLabel(header_content, text="⚡", font=ctk.CTkFont(size=28))
         logo_label.pack(side="left", padx=(0, 10))
 
@@ -187,7 +183,6 @@ class ProxyManagerApp(ctk.CTk):
         )
         sub_label.pack(anchor="w")
 
-        # Version & Live Status Badge
         badge_box = ctk.CTkFrame(header_content, fg_color="transparent")
         badge_box.pack(side="right")
 
@@ -247,8 +242,6 @@ class ProxyManagerApp(ctk.CTk):
             font=ctk.CTkFont(size=11, weight="bold"),
             command=self.autodetect_port
         )
-        c_header_right = ctk.CTkFrame(c_header, fg_color="transparent")
-        c_header_right.pack(side="right")
         self.autodetect_btn.pack(side="right")
 
         c_body = ctk.CTkFrame(config_card, fg_color="transparent")
@@ -279,11 +272,10 @@ class ProxyManagerApp(ctk.CTk):
         self.port_entry.insert(0, self.core.proxy_port)
         self.port_entry.grid(row=0, column=5, padx=5, pady=5, sticky="w")
 
-        # 4. Master Control & Latency Grid
+        # 4. Master Control & Real AI Matrix Latency Grid
         ctrl_card = ctk.CTkFrame(main_content, fg_color="#181824", corner_radius=10, border_width=1, border_color="#2A2A3C")
         ctrl_card.pack(fill="x", pady=8)
 
-        # Master Toggle Button
         btn_text = "🔴 Disable All Proxies" if self.is_proxy_enabled else "🟢 Enable & Patch All Proxies"
         btn_color = "#C62828" if self.is_proxy_enabled else "#2E7D32"
         btn_hover = "#B71C1C" if self.is_proxy_enabled else "#1B5E20"
@@ -299,17 +291,17 @@ class ProxyManagerApp(ctk.CTk):
         )
         self.toggle_btn.pack(fill="x", padx=15, pady=12)
 
-        # Latency Tester Section
+        # Real AI Endpoint Latency Matrix Section
         lat_header = ctk.CTkFrame(ctrl_card, fg_color="transparent")
         lat_header.pack(fill="x", padx=15, pady=(0, 6))
 
-        lat_title = ctk.CTkLabel(lat_header, text="Real-Time AI API Latency", font=ctk.CTkFont(size=12, weight="bold"), text_color="#AAAAAA")
+        lat_title = ctk.CTkLabel(lat_header, text="Real AI Endpoints Matrix & Geoblock Status", font=ctk.CTkFont(size=12, weight="bold"), text_color="#AAAAAA")
         lat_title.pack(side="left")
 
         self.test_btn = ctk.CTkButton(
             lat_header,
-            text="⚡ Test Latency",
-            width=110,
+            text="⚡ Test AI Endpoints",
+            width=130,
             height=24,
             fg_color="#1565C0",
             hover_color="#0D47A1",
@@ -318,19 +310,28 @@ class ProxyManagerApp(ctk.CTk):
         )
         self.test_btn.pack(side="right")
 
-        # Latency Cards Container (3 columns)
+        # Latency Matrix Cards Container (2 Rows x 3 Columns)
         lat_grid = ctk.CTkFrame(ctrl_card, fg_color="transparent")
         lat_grid.pack(fill="x", padx=15, pady=(0, 12))
         lat_grid.grid_columnconfigure((0, 1, 2), weight=1, uniform="lat")
 
-        self.lat_google = LatencyCard(lat_grid, "Google")
-        self.lat_google.grid(row=0, column=0, padx=(0, 4), sticky="ew")
+        self.lat_cards = {
+            "Claude API": LatencyCard(lat_grid, "Claude API"),
+            "Google Cloud Code": LatencyCard(lat_grid, "Google Cloud Code"),
+            "Google Gemini": LatencyCard(lat_grid, "Google Gemini"),
+            "OpenAI / Codex": LatencyCard(lat_grid, "OpenAI / Codex"),
+            "Cursor AI": LatencyCard(lat_grid, "Cursor AI"),
+            "Codeium Backend": LatencyCard(lat_grid, "Codeium Backend")
+        }
 
-        self.lat_claude = LatencyCard(lat_grid, "Claude API")
-        self.lat_claude.grid(row=0, column=1, padx=4, sticky="ew")
+        # Grid placement
+        self.lat_cards["Claude API"].grid(row=0, column=0, padx=(0, 4), pady=(0, 4), sticky="ew")
+        self.lat_cards["Google Cloud Code"].grid(row=0, column=1, padx=4, pady=(0, 4), sticky="ew")
+        self.lat_cards["Google Gemini"].grid(row=0, column=2, padx=(4, 0), pady=(0, 4), sticky="ew")
 
-        self.lat_cloudcode = LatencyCard(lat_grid, "Cloud Code API")
-        self.lat_cloudcode.grid(row=0, column=2, padx=(4, 0), sticky="ew")
+        self.lat_cards["OpenAI / Codex"].grid(row=1, column=0, padx=(0, 4), pady=(4, 0), sticky="ew")
+        self.lat_cards["Cursor AI"].grid(row=1, column=1, padx=4, pady=(4, 0), sticky="ew")
+        self.lat_cards["Codeium Backend"].grid(row=1, column=2, padx=(4, 0), pady=(4, 0), sticky="ew")
 
         # 5. Target List Dashboard Header
         tgt_header = ctk.CTkFrame(main_content, fg_color="transparent")
@@ -483,9 +484,8 @@ class ProxyManagerApp(ctk.CTk):
         self.tray_icon.icon = new_icon
 
     def test_latency(self):
-        self.lat_google.value_label.configure(text="Pinging...", text_color="#AAAAAA")
-        self.lat_claude.value_label.configure(text="Pinging...", text_color="#AAAAAA")
-        self.lat_cloudcode.value_label.configure(text="Pinging...", text_color="#AAAAAA")
+        for card in self.lat_cards.values():
+            card.value_label.configure(text="Pinging...", text_color="#AAAAAA")
         self.update_idletasks()
 
         threading.Thread(target=self._run_latency_test, daemon=True).start()
@@ -496,13 +496,10 @@ class ProxyManagerApp(ctk.CTk):
         self.core.set_proxy_config(ip, port)
 
         results = self.core.test_api_latency()
-        g_ms = results.get("Google")
-        c_ms = results.get("Claude API")
-        m_ms = results.get("Cloud Code API")
-
-        self.after(0, lambda: self.lat_google.set_latency(g_ms))
-        self.after(0, lambda: self.lat_claude.set_latency(c_ms))
-        self.after(0, lambda: self.lat_cloudcode.set_latency(m_ms))
+        for name, card in self.lat_cards.items():
+            if name in results:
+                ms, status = results[name]
+                self.after(0, lambda c=card, m=ms, s=status: c.set_latency_status(m, s))
 
     def toggle_autostart(self):
         enable = bool(self.autostart_checkbox.get())
