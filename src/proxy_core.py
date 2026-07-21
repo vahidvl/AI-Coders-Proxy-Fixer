@@ -94,6 +94,33 @@ class ProxyManagerCore:
             if var in os.environ:
                 del os.environ[var]
 
+    def _notify_windows_proxy_changed(self):
+        """Force Windows, Edge, Chrome, and Electron apps to immediately reload system proxy settings."""
+        try:
+            import ctypes
+            INTERNET_OPTION_SETTINGS_CHANGED = 39
+            INTERNET_OPTION_REFRESH = 37
+            wininet = ctypes.windll.wininet
+            wininet.InternetSetOptionW(0, INTERNET_OPTION_SETTINGS_CHANGED, 0, 0)
+            wininet.InternetSetOptionW(0, INTERNET_OPTION_REFRESH, 0, 0)
+        except Exception as e:
+            print(f"WinInet refresh error: {e}")
+            
+        try:
+            import ctypes
+            HWND_BROADCAST = 0xFFFF
+            WM_SETTINGCHANGE = 0x001A
+            SMTO_ABORTIFHUNG = 0x0002
+            result = ctypes.c_ulong()
+            ctypes.windll.user32.SendMessageTimeoutW(
+                HWND_BROADCAST, WM_SETTINGCHANGE, 0, "Environment", SMTO_ABORTIFHUNG, 2000, ctypes.byref(result)
+            )
+            ctypes.windll.user32.SendMessageTimeoutW(
+                HWND_BROADCAST, WM_SETTINGCHANGE, 0, "Internet Settings", SMTO_ABORTIFHUNG, 2000, ctypes.byref(result)
+            )
+        except Exception as e:
+            print(f"SettingChange broadcast error: {e}")
+
     def _set_system_proxy(self):
         reg_key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, 
@@ -103,8 +130,9 @@ class ProxyManagerCore:
         )
         winreg.SetValueEx(reg_key, "ProxyEnable", 0, winreg.REG_DWORD, 1)
         winreg.SetValueEx(reg_key, "ProxyServer", 0, winreg.REG_SZ, f"{self.proxy_address}:{self.proxy_port}")
-        winreg.SetValueEx(reg_key, "ProxyOverride", 0, winreg.REG_SZ, "localhost;127.0.0.1;::1;<local>")
+        winreg.SetValueEx(reg_key, "ProxyOverride", 0, winreg.REG_SZ, "<local>;127.0.0.1;localhost;::1")
         winreg.CloseKey(reg_key)
+        self._notify_windows_proxy_changed()
 
     def _clear_system_proxy(self):
         reg_key = winreg.OpenKey(
@@ -120,6 +148,7 @@ class ProxyManagerCore:
         except FileNotFoundError:
             pass # Already deleted
         winreg.CloseKey(reg_key)
+        self._notify_windows_proxy_changed()
 
     def _set_git_proxy(self):
         subprocess.run(['git', 'config', '--global', 'http.proxy', self.full_proxy_url], capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
