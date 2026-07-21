@@ -1,5 +1,13 @@
 import os
 import sys
+import io
+
+# Fix PyInstaller --windowed mode where sys.stdout and sys.stderr are None
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 import ctypes
 import threading
 import time
@@ -175,33 +183,29 @@ class TargetRowFrame(ctk.CTkFrame):
 
 class ProxyManagerApp(ctk.CTk):
     def __init__(self):
-        print("[DEBUG] Step 1: Entering ProxyManagerApp.__init__", flush=True)
         super().__init__()
 
-        print("[DEBUG] Step 2: Setting title and geometry", flush=True)
         self.title("AI Coders Proxy Fixer v2.0 - Real AI Matrix Dashboard")
         self.geometry("680x880")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.hide_window)
 
-        print("[DEBUG] Step 3: Initializing ProxyManagerCore", flush=True)
         self.core = ProxyManagerCore()
         self.is_proxy_enabled = self.core.check_status()
+        self.tray_icon = None
 
-        print("[DEBUG] Step 4: Calling setup_ui", flush=True)
         self.setup_ui()
-        print("[DEBUG] Step 5: Calling setup_icon", flush=True)
         self.setup_icon()
-        print("[DEBUG] Step 6: Calling setup_tray", flush=True)
-        self.setup_tray()
-        print("[DEBUG] Step 7: Calling rescan_targets", flush=True)
         self.rescan_targets()
-        print("[DEBUG] Step 8: ProxyManagerApp.__init__ finished", flush=True)
 
+        # Bring window to front immediately
         self.deiconify()
         self.attributes("-topmost", True)
-        self.after(200, lambda: self.attributes("-topmost", False))
+        self.after(300, lambda: self.attributes("-topmost", False))
         self.focus_force()
+
+        # Initialize system tray icon after GUI is mapped
+        self.after(500, self.setup_tray)
 
     def setup_ui(self):
         # 1. Header Banner
@@ -583,7 +587,8 @@ class ProxyManagerApp(ctk.CTk):
         else:
             self.live_pulse_label.configure(text="○ OFFLINE", text_color="#FF5252")
             self.toggle_btn.configure(text="🟢 Enable & Patch All Proxies", fg_color="#2E7D32", hover_color="#1B5E20")
-        self.tray_icon.icon = self.generate_icon(self.is_proxy_enabled)
+        if self.tray_icon is not None:
+            self.tray_icon.icon = self.generate_icon(self.is_proxy_enabled)
 
     def test_latency(self):
         for card in self.lat_cards.values():
