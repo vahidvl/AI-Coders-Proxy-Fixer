@@ -175,19 +175,28 @@ class TargetRowFrame(ctk.CTkFrame):
 
 class ProxyManagerApp(ctk.CTk):
     def __init__(self):
+        print("[DEBUG] Step 1: Entering ProxyManagerApp.__init__", flush=True)
         super().__init__()
 
+        print("[DEBUG] Step 2: Setting title and geometry", flush=True)
         self.title("AI Coders Proxy Fixer v2.0 - Real AI Matrix Dashboard")
         self.geometry("680x880")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.hide_window)
 
+        print("[DEBUG] Step 3: Initializing ProxyManagerCore", flush=True)
         self.core = ProxyManagerCore()
         self.is_proxy_enabled = self.core.check_status()
 
+        print("[DEBUG] Step 4: Calling setup_ui", flush=True)
         self.setup_ui()
+        print("[DEBUG] Step 5: Calling setup_icon", flush=True)
+        self.setup_icon()
+        print("[DEBUG] Step 6: Calling setup_tray", flush=True)
         self.setup_tray()
+        print("[DEBUG] Step 7: Calling rescan_targets", flush=True)
         self.rescan_targets()
+        print("[DEBUG] Step 8: ProxyManagerApp.__init__ finished", flush=True)
 
     def setup_ui(self):
         # 1. Header Banner
@@ -649,6 +658,13 @@ class ProxyManagerApp(ctk.CTk):
         close_btn.pack(side="left", padx=5)
 
 if __name__ == "__main__":
-    ensure_single_instance()
-    app = ProxyManagerApp()
-    app.mainloop()
+    import traceback
+    crash_log = Path(os.environ.get('USERPROFILE', '.')) / "ai_proxy_fixer_crash.log"
+    try:
+        # ensure_single_instance() # Temporarily disabled to rule out Mutex lockouts
+        app = ProxyManagerApp()
+        app.mainloop()
+    except Exception as e:
+        with open(crash_log, "w", encoding="utf-8") as f:
+            f.write(traceback.format_exc())
+        ctypes.windll.user32.MessageBoxW(0, f"Error starting app:\n\n{str(e)}\n\nSee log: {crash_log}", "Startup Error", 0x10)
