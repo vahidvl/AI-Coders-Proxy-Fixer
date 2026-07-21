@@ -13,9 +13,12 @@ import customtkinter as ctk
 from proxy_core import ProxyManagerCore
 from scanner import scan_proxy_ports, TargetType, DetectedTarget
 
+_mutex_handle = None
+
 def ensure_single_instance():
     """Ensure only one instance of the app runs at a time using Windows Named Mutex."""
-    MUTEX_NAME = "Global\\AICodersProxyFixerSingleInstanceMutex"
+    global _mutex_handle
+    MUTEX_NAME = "Local\\AICodersProxyFixerMutex_v2"
     ERROR_ALREADY_EXISTS = 183
 
     try:
@@ -26,10 +29,10 @@ def ensure_single_instance():
 
     try:
         kernel32 = ctypes.windll.kernel32
-        mutex = kernel32.CreateMutexW(None, False, MUTEX_NAME)
+        _mutex_handle = kernel32.CreateMutexW(None, False, MUTEX_NAME)
         last_error = kernel32.GetLastError()
 
-        if last_error == ERROR_ALREADY_EXISTS:
+        if _mutex_handle and last_error == ERROR_ALREADY_EXISTS:
             user32 = ctypes.windll.user32
             MB_OK = 0x0
             MB_ICONINFORMATION = 0x40
@@ -40,10 +43,8 @@ def ensure_single_instance():
                 MB_OK | MB_ICONINFORMATION
             )
             sys.exit(0)
-        return mutex
     except Exception as e:
         print(f"Mutex error: {e}")
-        return None
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
