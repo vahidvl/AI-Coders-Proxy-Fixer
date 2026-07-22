@@ -25,10 +25,8 @@ class TargetPatcher:
                 return self.patch_powershell(config_path)
             elif ".bashrc" in str(config_path):
                 return self.patch_bash(config_path)
-            elif ".claude.json" in str(config_path):
-                return self.patch_claude_cli(config_path)
-            elif ".copilot-cli" in str(config_path):
-                return self.patch_claude_cli(config_path)
+            elif ".claude.json" in str(config_path) or ".copilot-cli" in str(config_path) or ".opencode" in str(config_path) or ".qwen" in str(config_path) or ".supermaven" in str(config_path) or ".antigravity" in str(config_path):
+                return self.patch_json_cli(config_path)
             elif ".continue" in str(config_path):
                 return self.patch_continue_dev(config_path)
             elif ".aider.conf.yml" in str(config_path):
@@ -46,8 +44,8 @@ class TargetPatcher:
         try:
             if "profile.ps1" in str(config_path) or ".bashrc" in str(config_path):
                 return self.unpatch_shell(config_path)
-            elif ".claude.json" in str(config_path) or ".copilot-cli" in str(config_path):
-                return self.unpatch_claude_cli(config_path)
+            elif ".claude.json" in str(config_path) or ".copilot-cli" in str(config_path) or ".opencode" in str(config_path) or ".qwen" in str(config_path) or ".supermaven" in str(config_path) or ".antigravity" in str(config_path):
+                return self.unpatch_json_cli(config_path)
             elif ".continue" in str(config_path):
                 return self.unpatch_continue_dev(config_path)
             elif ".aider.conf.yml" in str(config_path):
@@ -110,38 +108,30 @@ class TargetPatcher:
     def patch_powershell(self, profile_path: Path) -> Tuple[bool, str]:
         profile_path.parent.mkdir(parents=True, exist_ok=True)
         content = profile_path.read_text(encoding='utf-8') if profile_path.exists() else ""
-        
-        # Remove old block if exists
         lines = [line for line in content.splitlines() if not (BLOCK_BEGIN in line or BLOCK_END in line or "$env:HTTP_PROXY" in line or "$env:HTTPS_PROXY" in line or "$env:NO_PROXY" in line)]
-        
         ps_block = f"{BLOCK_BEGIN}\n$env:HTTP_PROXY=\"{self.full_proxy_url}\"\n$env:HTTPS_PROXY=\"{self.full_proxy_url}\"\n$env:NO_PROXY=\"{self.no_proxy_list}\"\n{BLOCK_END}"
         new_content = "\n".join(lines).strip() + "\n\n" + ps_block + "\n"
-        
         profile_path.write_text(new_content, encoding='utf-8')
         return True, "Successfully patched PowerShell profile."
 
     def patch_bash(self, bashrc_path: Path) -> Tuple[bool, str]:
         bashrc_path.parent.mkdir(parents=True, exist_ok=True)
         content = bashrc_path.read_text(encoding='utf-8') if bashrc_path.exists() else ""
-
         lines = [line for line in content.splitlines() if not (BLOCK_BEGIN in line or BLOCK_END in line or "export HTTP_PROXY=" in line or "export HTTPS_PROXY=" in line or "export NO_PROXY=" in line)]
-
         bash_block = f"{BLOCK_BEGIN}\nexport HTTP_PROXY=\"{self.full_proxy_url}\"\nexport HTTPS_PROXY=\"{self.full_proxy_url}\"\nexport NO_PROXY=\"{self.no_proxy_list}\"\n{BLOCK_END}"
         new_content = "\n".join(lines).strip() + "\n\n" + bash_block + "\n"
-
         bashrc_path.write_text(new_content, encoding='utf-8')
         return True, "Successfully patched Git Bash .bashrc"
 
     def unpatch_shell(self, shell_path: Path) -> Tuple[bool, str]:
         if not shell_path.exists():
             return True, "Profile file does not exist."
-
         content = shell_path.read_text(encoding='utf-8')
         lines = [line for line in content.splitlines() if not (BLOCK_BEGIN in line or BLOCK_END in line or "HTTP_PROXY" in line or "HTTPS_PROXY" in line or "NO_PROXY" in line)]
         shell_path.write_text("\n".join(lines).strip() + "\n", encoding='utf-8')
         return True, f"Successfully unpatched {shell_path.name}"
 
-    def patch_claude_cli(self, config_path: Path) -> Tuple[bool, str]:
+    def patch_json_cli(self, config_path: Path) -> Tuple[bool, str]:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         data = {}
         if config_path.exists():
@@ -149,20 +139,20 @@ class TargetPatcher:
                 data = json.loads(config_path.read_text(encoding='utf-8'))
             except Exception:
                 pass
-
         data['httpProxy'] = self.full_proxy_url
         data['httpsProxy'] = self.full_proxy_url
+        data['proxy'] = self.full_proxy_url
         config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
         return True, f"Successfully patched {config_path.name}"
 
-    def unpatch_claude_cli(self, config_path: Path) -> Tuple[bool, str]:
+    def unpatch_json_cli(self, config_path: Path) -> Tuple[bool, str]:
         if not config_path.exists():
             return True, "Config file does not exist."
-
         try:
             data = json.loads(config_path.read_text(encoding='utf-8'))
             data.pop('httpProxy', None)
             data.pop('httpsProxy', None)
+            data.pop('proxy', None)
             config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
             return True, f"Successfully unpatched {config_path.name}"
         except Exception as e:
@@ -176,7 +166,6 @@ class TargetPatcher:
                 data = json.loads(config_path.read_text(encoding='utf-8'))
             except Exception:
                 pass
-
         if "requestOptions" not in data:
             data["requestOptions"] = {}
         data["requestOptions"]["proxy"] = self.full_proxy_url
@@ -186,7 +175,6 @@ class TargetPatcher:
     def unpatch_continue_dev(self, config_path: Path) -> Tuple[bool, str]:
         if not config_path.exists():
             return True, "Config file does not exist."
-
         try:
             data = json.loads(config_path.read_text(encoding='utf-8'))
             if "requestOptions" in data:
