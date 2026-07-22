@@ -446,10 +446,6 @@ class ProxyManagerApp(ctk.CTk):
         )
         info_label.pack(side="right")
 
-        self.setup_ui()
-        self.setup_icon()
-        self.setup_tray()
-        self.rescan_targets()
 
     def setup_icon(self):
         icon_path = Path(__file__).parent.parent / "assets" / "app_icon.ico"
@@ -498,18 +494,19 @@ class ProxyManagerApp(ctk.CTk):
             pass
 
     def hide_window(self):
-        self.withdraw()
+        self.iconify()
 
     def show_window(self, icon=None, item=None):
-        self.after(0, self.deiconify)
-        self.after(0, self.lift)
-        self.after(0, self.focus_force)
+        self.deiconify()
+        self.lift()
+        self.focus_force()
 
     def quit_app(self, icon=None, item=None):
-        try:
-            self.tray_icon.stop()
-        except Exception:
-            pass
+        if hasattr(self, 'tray_icon') and self.tray_icon is not None:
+            try:
+                self.tray_icon.stop()
+            except Exception:
+                pass
         self.destroy()
         sys.exit(0)
 
