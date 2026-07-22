@@ -10,14 +10,14 @@ class TargetType:
     CLI = "CLI Tool"
 
 class DetectedTarget:
-    def __init__(self, name: str, target_type: str, config_path: Optional[Path], is_installed: bool, is_patched: bool = False, details: str = "", icon_symbol: str = "💻", brand_color: str = "#311B92"):
+    def __init__(self, name: str, target_type: str, config_path: Optional[Path], is_installed: bool, is_patched: bool = False, details: str = "", icon_name: str = "vscode.png", brand_color: str = "#311B92"):
         self.name = name
         self.target_type = target_type
         self.config_path = config_path
         self.is_installed = is_installed
         self.is_patched = is_patched
         self.details = details
-        self.icon_symbol = icon_symbol
+        self.icon_name = icon_name
         self.brand_color = brand_color
 
     def to_dict(self) -> Dict:
@@ -28,7 +28,7 @@ class DetectedTarget:
             "installed": self.is_installed,
             "patched": self.is_patched,
             "details": self.details,
-            "icon_symbol": self.icon_symbol,
+            "icon_name": self.icon_name,
             "brand_color": self.brand_color
         }
 
@@ -49,7 +49,7 @@ def scan_proxy_ports() -> List[Tuple[int, str]]:
     active_ports = []
     for port, name in COMMON_PROXY_PORTS:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.15)
+            s.settimeout(0.12)
             result = s.connect_ex(('127.0.0.1', port))
             if result == 0:
                 active_ports.append((port, name))
@@ -77,7 +77,7 @@ class ScannerEngine:
                     ag_ide_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Antigravity IDE", TargetType.IDE, ag_ide_cfg, ag_ide_installed, ag_ide_patched, "Installed" if ag_ide_installed else "Not found", "🚀", "#6200EA"))
+        targets.append(DetectedTarget("Antigravity IDE", TargetType.IDE, ag_ide_cfg, ag_ide_installed, ag_ide_patched, "Installed" if ag_ide_installed else "Not found", "antigravity_ide.png", "#4A148C"))
 
         # 2. Antigravity CLI
         ag_cli_cfg = user_dir / ".antigravity" / "config.json"
@@ -90,7 +90,7 @@ class ScannerEngine:
                     ag_cli_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Antigravity CLI", TargetType.CLI, ag_cli_cfg, ag_cli_installed, ag_cli_patched, "Installed" if ag_cli_installed else "Not found", "⚡", "#7C4DFF"))
+        targets.append(DetectedTarget("Antigravity CLI", TargetType.CLI, ag_cli_cfg, ag_cli_installed, ag_cli_patched, "Installed" if ag_cli_installed else "Not found", "antigravity_cli.png", "#6A1B9A"))
 
         # 3. Claude Code CLI
         claude_cfg = user_dir / ".claude.json"
@@ -103,7 +103,7 @@ class ScannerEngine:
                     claude_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Claude Code CLI", TargetType.CLI, claude_cfg, claude_installed, claude_patched, "Installed" if claude_installed else "Not found", "🤖", "#D84315"))
+        targets.append(DetectedTarget("Claude Code CLI", TargetType.CLI, claude_cfg, claude_installed, claude_patched, "Installed" if claude_installed else "Not found", "claude_code.png", "#BF360C"))
 
         # 4. OpenAI Codex / Copilot CLI
         codex_cfg = user_dir / ".copilot-cli" / "config.json"
@@ -116,7 +116,7 @@ class ScannerEngine:
                     codex_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("OpenAI Codex CLI", TargetType.CLI, codex_cfg, codex_installed, codex_patched, "Installed" if codex_installed else "Not found", "💻", "#00897B"))
+        targets.append(DetectedTarget("OpenAI Codex CLI", TargetType.CLI, codex_cfg, codex_installed, codex_patched, "Installed" if codex_installed else "Not found", "codex.png", "#004D40"))
 
         # 5. VS Code
         vsc_cfg = appdata_dir / "Code" / "User" / "settings.json"
@@ -129,7 +129,7 @@ class ScannerEngine:
                     vsc_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("VS Code", TargetType.IDE, vsc_cfg, vsc_installed, vsc_patched, "Installed" if vsc_installed else "Not found", "🟦", "#1E88E5"))
+        targets.append(DetectedTarget("VS Code", TargetType.IDE, vsc_cfg, vsc_installed, vsc_patched, "Installed" if vsc_installed else "Not found", "vscode.png", "#0D47A1"))
 
         # 6. Cursor AI IDE
         cur_cfg = appdata_dir / "Cursor" / "User" / "settings.json"
@@ -142,7 +142,7 @@ class ScannerEngine:
                     cur_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Cursor AI IDE", TargetType.IDE, cur_cfg, cur_installed, cur_patched, "Installed" if cur_installed else "Not found", "🔮", "#8E24AA"))
+        targets.append(DetectedTarget("Cursor AI IDE", TargetType.IDE, cur_cfg, cur_installed, cur_patched, "Installed" if cur_installed else "Not found", "cursor.png", "#1A237E"))
 
         # 7. Windsurf IDE
         ws_cfg = appdata_dir / "Windsurf" / "User" / "settings.json"
@@ -155,7 +155,7 @@ class ScannerEngine:
                     ws_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Windsurf IDE", TargetType.IDE, ws_cfg, ws_installed, ws_patched, "Installed" if ws_installed else "Not found", "🏄", "#00ACC1"))
+        targets.append(DetectedTarget("Windsurf IDE", TargetType.IDE, ws_cfg, ws_installed, ws_patched, "Installed" if ws_installed else "Not found", "windsurf.png", "#006064"))
 
         # 8. OpenCode AI
         opencode_cfg = user_dir / ".opencode" / "config.json"
@@ -168,7 +168,7 @@ class ScannerEngine:
                     opencode_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("OpenCode AI", TargetType.CLI, opencode_cfg, opencode_installed, opencode_patched, "Installed" if opencode_installed else "Not found", "🌐", "#43A047"))
+        targets.append(DetectedTarget("OpenCode AI", TargetType.CLI, opencode_cfg, opencode_installed, opencode_patched, "Installed" if opencode_installed else "Not found", "opencode.png", "#1B5E20"))
 
         # 9. Qwen Coder / Qwen Agent
         qwen_cfg = user_dir / ".qwen" / "config.json"
@@ -181,7 +181,7 @@ class ScannerEngine:
                     qwen_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Qwen Coder AI", TargetType.CLI, qwen_cfg, qwen_installed, qwen_patched, "Installed" if qwen_installed else "Not found", "🧠", "#FB8C00"))
+        targets.append(DetectedTarget("Qwen Coder AI", TargetType.CLI, qwen_cfg, qwen_installed, qwen_patched, "Installed" if qwen_installed else "Not found", "qwen.png", "#E65100"))
 
         # 10. Continue.dev AI Extension
         cont_cfg = user_dir / ".continue" / "config.json"
@@ -194,7 +194,7 @@ class ScannerEngine:
                     cont_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Continue.dev AI", TargetType.CLI, cont_cfg, cont_installed, cont_patched, "Installed" if cont_installed else "Not found", "⏩", "#E53935"))
+        targets.append(DetectedTarget("Continue.dev AI", TargetType.CLI, cont_cfg, cont_installed, cont_patched, "Installed" if cont_installed else "Not found", "continue.png", "#B71C1C"))
 
         # 11. Aider AI CLI
         aider_cfg = user_dir / ".aider.conf.yml"
@@ -207,7 +207,7 @@ class ScannerEngine:
                     aider_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Aider AI CLI", TargetType.CLI, aider_cfg, aider_installed, aider_patched, "Installed" if aider_installed else "Not found", "🐚", "#D81B60"))
+        targets.append(DetectedTarget("Aider AI CLI", TargetType.CLI, aider_cfg, aider_installed, aider_patched, "Installed" if aider_installed else "Not found", "aider.png", "#880E4F"))
 
         # 12. Supermaven AI
         sm_cfg = user_dir / ".supermaven" / "config.json"
@@ -220,7 +220,7 @@ class ScannerEngine:
                     sm_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Supermaven AI", TargetType.CLI, sm_cfg, sm_installed, sm_patched, "Installed" if sm_installed else "Not found", "⚡", "#FDD835"))
+        targets.append(DetectedTarget("Supermaven AI", TargetType.CLI, sm_cfg, sm_installed, sm_patched, "Installed" if sm_installed else "Not found", "supermaven.png", "#F57F17"))
 
         # 13. Cline / Roo Code Extensions
         cline_dir = user_dir / ".vscode" / "extensions"
@@ -234,7 +234,7 @@ class ScannerEngine:
                         break
             except Exception:
                 pass
-        targets.append(DetectedTarget("Cline / Roo Code", TargetType.IDE, cline_dir if cline_installed else None, cline_installed, cline_patched, "Installed" if cline_installed else "Not found", "🤖", "#8E24AA"))
+        targets.append(DetectedTarget("Cline / Roo Code", TargetType.IDE, cline_dir if cline_installed else None, cline_installed, cline_patched, "Installed" if cline_installed else "Not found", "cline.png", "#4A148C"))
 
         # 14. PowerShell Profile
         ps_profile = user_dir / "Documents" / "WindowsPowerShell" / "profile.ps1"
@@ -249,7 +249,7 @@ class ScannerEngine:
                     ps_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("PowerShell Profile", TargetType.SHELL, ps_profile, ps_installed, ps_patched, "Installed" if ps_installed else "Not found", "⚡", "#0277BD"))
+        targets.append(DetectedTarget("PowerShell Profile", TargetType.SHELL, ps_profile, ps_installed, ps_patched, "Installed" if ps_installed else "Not found", "powershell.png", "#01579B"))
 
         # 15. Git Bash
         bashrc = user_dir / ".bashrc"
@@ -261,6 +261,6 @@ class ScannerEngine:
                     bash_patched = True
             except Exception:
                 pass
-        targets.append(DetectedTarget("Git Bash (.bashrc)", TargetType.SHELL, bashrc, True, bash_patched, "Installed", "🐚", "#F4511E"))
+        targets.append(DetectedTarget("Git Bash (.bashrc)", TargetType.SHELL, bashrc, True, bash_patched, "Installed", "gitbash.png", "#D84315"))
 
         return targets

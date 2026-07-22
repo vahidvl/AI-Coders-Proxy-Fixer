@@ -65,35 +65,40 @@ PRESETS = {
 }
 
 class CyberpunkScannerOverlay(ctk.CTkToplevel):
-    """Futuristic 5-second cyberpunk animated scanner modal."""
+    """Futuristic 5-second cyberpunk animated scanner modal centered over main window."""
     def __init__(self, master, on_complete_callback):
         super().__init__(master)
+        self.master = master
         self.on_complete_callback = on_complete_callback
 
-        self.title("CYBER-SCAN ENGINE v2.1")
-        self.geometry("520x300")
+        self.title("CYBER-SCAN ENGINE")
+        self.geometry("480x260")
         self.resizable(False, False)
-        self.attributes("-topmost", True)
+        self.transient(master)
+        self.grab_set()
         self.configure(fg_color="#0A0A12")
-        self.overrideredirect(True) # Frameless modal
 
-        # Center modal on screen
-        self.update_idletasks()
-        x = (self.winfo_screenwidth() - 520) // 2
-        y = (self.winfo_screenheight() - 300) // 2
-        self.geometry(f"520x300+{x}+{y}")
+        # Center modal over parent window
+        master.update_idletasks()
+        mx = master.winfo_x()
+        my = master.winfo_y()
+        mw = master.winfo_width()
+        mh = master.winfo_height()
+        x = mx + (mw - 480) // 2
+        y = my + (mh - 260) // 2
+        self.geometry(f"480x260+{max(0, x)}+{max(0, y)}")
 
         # UI Setup
-        main_frame = ctk.CTkFrame(self, fg_color="#0F0F1A", border_width=2, border_color="#00E676", corner_radius=12)
+        main_frame = ctk.CTkFrame(self, fg_color="#0F0F1A", border_width=2, border_color="#00E676", corner_radius=10)
         main_frame.pack(fill="both", expand=True, padx=4, pady=4)
 
         header_label = ctk.CTkLabel(
             main_frame,
             text="⚡ CYBER-SCAN MATRIX ENGINE ⚡",
-            font=ctk.CTkFont(family="Consolas", size=16, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=14, weight="bold"),
             text_color="#00E676"
         )
-        header_label.pack(pady=(20, 10))
+        header_label.pack(pady=(16, 6))
 
         self.status_label = ctk.CTkLabel(
             main_frame,
@@ -101,53 +106,50 @@ class CyberpunkScannerOverlay(ctk.CTkToplevel):
             font=ctk.CTkFont(family="Consolas", size=11),
             text_color="#00E5FF"
         )
-        self.status_label.pack(pady=(5, 15))
+        self.status_label.pack(pady=(2, 10))
 
         # Progress Bar
-        self.progress = ctk.CTkProgressBar(main_frame, width=420, height=14, corner_radius=7, progress_color="#00E676", fg_color="#1A1A2E")
+        self.progress = ctk.CTkProgressBar(main_frame, width=400, height=12, corner_radius=6, progress_color="#00E676", fg_color="#1A1A2E")
         self.progress.set(0)
-        self.progress.pack(pady=10)
+        self.progress.pack(pady=6)
 
         self.pct_label = ctk.CTkLabel(
             main_frame,
             text="0%",
-            font=ctk.CTkFont(family="Consolas", size=14, weight="bold"),
+            font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
             text_color="#00E676"
         )
-        self.pct_label.pack(pady=(5, 10))
+        self.pct_label.pack(pady=(2, 6))
 
         self.terminal_box = ctk.CTkTextbox(
             main_frame,
-            width=440,
-            height=80,
+            width=420,
+            height=65,
             font=ctk.CTkFont(family="Consolas", size=10),
             fg_color="#05050A",
             text_color="#76FF03",
             corner_radius=6
         )
-        self.terminal_box.pack(pady=(5, 15))
+        self.terminal_box.pack(pady=(2, 10))
 
-        # Start 5-second animation thread
         threading.Thread(target=self.run_animation, daemon=True).start()
 
     def run_animation(self):
         steps = [
-            (0.1, 0.15, "[REGISTRY] Interrogating Windows System Keys & Environment..."),
-            (0.3, 0.35, "[PROXY] Probing Active Ports (v2rayN, Happ, Clash, Hotspot Shield)..."),
-            (0.5, 0.60, "[IDEs] Inspecting IDE Settings (Antigravity, Cursor, VS Code, Windsurf)..."),
-            (0.7, 0.82, "[CLIs] Scanning AI CLI Configs (Claude Code, Codex, OpenCode, Qwen)..."),
-            (0.9, 0.95, "[SYNC] Verifying Network Latency Matrix & Patch Integrity..."),
-            (1.0, 1.00, "[COMPLETE] Cyber-Scan Finished! Launching Dashboard...")
+            (0.15, "[REGISTRY] Interrogating Windows System Keys..."),
+            (0.40, "[PROXY] Probing Ports (v2rayN, Happ, Clash, Hotspot Shield)..."),
+            (0.65, "[IDEs] Inspecting IDE Settings (Antigravity, Cursor, VS Code)..."),
+            (0.85, "[CLIs] Scanning AI CLI Configs (Claude Code, Codex, Qwen)..."),
+            (1.00, "[COMPLETE] Cyber-Scan Finished! Synchronizing Matrix...")
         ]
 
-        start_time = time.time()
-        duration = 4.5 # 4.5 seconds for total scan feel
+        duration = 4.0
 
-        for elapsed_ratio, pct, msg in steps:
-            time.sleep(duration * 0.18)
+        for pct, msg in steps:
+            time.sleep(duration * 0.20)
             self.after(0, lambda p=pct, m=msg: self.update_ui(p, m))
 
-        time.sleep(0.4)
+        time.sleep(0.3)
         self.after(0, self.finish_scan)
 
     def update_ui(self, pct, msg):
@@ -158,16 +160,30 @@ class CyberpunkScannerOverlay(ctk.CTkToplevel):
         self.terminal_box.see("end")
 
     def finish_scan(self):
-        self.destroy()
+        try:
+            self.grab_release()
+            self.destroy()
+        except Exception:
+            pass
         if self.on_complete_callback:
             self.on_complete_callback()
 
+class ToastNotification(ctk.CTkFrame):
+    """Sleek temporary toast notification."""
+    def __init__(self, master, message: str, is_success: bool = True):
+        bg = "#1B5E20" if is_success else "#C62828"
+        super().__init__(master, fg_color=bg, corner_radius=8)
+        label = ctk.CTkLabel(self, text=message, font=ctk.CTkFont(size=12, weight="bold"), text_color="#FFFFFF")
+        label.pack(padx=16, pady=8)
+        self.place(relx=0.5, rely=0.08, anchor="center")
+        master.after(2200, self.destroy)
+
 class LatencyCard(ctk.CTkFrame):
     def __init__(self, master, name: str):
-        super().__init__(master, fg_color="#1E1E2A", corner_radius=8, border_width=1, border_color="#2C2C3E")
+        super().__init__(master, fg_color="#181824", corner_radius=8, border_width=1, border_color="#262638")
         self.name = name
 
-        self.title_label = ctk.CTkLabel(self, text=name, font=ctk.CTkFont(size=10, weight="bold"), text_color="#9E9EA0")
+        self.title_label = ctk.CTkLabel(self, text=name, font=ctk.CTkFont(size=10, weight="bold"), text_color="#8E8EA0")
         self.title_label.pack(anchor="w", padx=8, pady=(4, 0))
 
         self.value_label = ctk.CTkLabel(self, text="-- ms", font=ctk.CTkFont(size=12, weight="bold"), text_color="#00E676")
@@ -184,7 +200,7 @@ class LatencyCard(ctk.CTkFrame):
 
 class StatCard(ctk.CTkFrame):
     def __init__(self, master, title: str, value: str, icon_str: str, val_color: str = "#00E676"):
-        super().__init__(master, fg_color="#1A1A24", corner_radius=8, border_width=1, border_color="#2A2A3C")
+        super().__init__(master, fg_color="#181824", corner_radius=8, border_width=1, border_color="#262638")
 
         self.icon_label = ctk.CTkLabel(self, text=icon_str, font=ctk.CTkFont(size=16))
         self.icon_label.grid(row=0, column=0, rowspan=2, padx=(10, 5), pady=8)
@@ -192,7 +208,7 @@ class StatCard(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(self, text=title, font=ctk.CTkFont(size=10, weight="bold"), text_color="#8E8EA0")
         self.title_label.grid(row=0, column=1, sticky="w", padx=5, pady=(6, 0))
 
-        self.val_label = ctk.CTkLabel(self, text=value, font=ctk.CTkFont(size=13, weight="bold"), text_color=val_color)
+        self.val_label = ctk.CTkLabel(self, text=value, font=ctk.CTkFont(size=12, weight="bold"), text_color=val_color)
         self.val_label.grid(row=1, column=1, sticky="w", padx=5, pady=(0, 6))
 
     def update_val(self, value: str, val_color: str = None):
@@ -202,77 +218,97 @@ class StatCard(ctk.CTkFrame):
 
 class TargetRowFrame(ctk.CTkFrame):
     def __init__(self, master, target: DetectedTarget, on_patch_click):
-        super().__init__(master, fg_color="#181824", corner_radius=8, border_width=1, border_color="#262636")
+        super().__init__(master, fg_color="#161622", corner_radius=6, border_width=1, border_color="#222232")
         self.target = target
         self.on_patch_click = on_patch_click
         self.setup_ui()
 
     def setup_ui(self):
-        icon_symbol = getattr(self.target, 'icon_symbol', '💻')
-        brand_color = getattr(self.target, 'brand_color', '#311B92')
+        # Strict Grid Columns: 0: Icon, 1: Name, 2: Type Badge, 3: Status, 4: Button
+        self.columnconfigure(1, weight=1)
 
-        icon_label = ctk.CTkLabel(self, text=icon_symbol, font=ctk.CTkFont(size=16))
-        icon_label.pack(side="left", padx=(12, 6), pady=8)
+        # Load PNG Brand Icon
+        icon_path = Path(__file__).parent.parent / "assets" / "icons" / self.target.icon_name
+        if not icon_path.exists() and getattr(sys, 'frozen', False):
+            icon_path = Path(sys._MEIPASS) / "assets" / "icons" / self.target.icon_name
+
+        if icon_path.exists():
+            try:
+                pil_img = Image.open(str(icon_path)).resize((22, 22), Image.Resampling.LANCZOS)
+                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(22, 22))
+                icon_lbl = ctk.CTkLabel(self, image=ctk_img, text="")
+            except Exception:
+                icon_lbl = ctk.CTkLabel(self, text="💻", font=ctk.CTkFont(size=14))
+        else:
+            icon_lbl = ctk.CTkLabel(self, text="💻", font=ctk.CTkFont(size=14))
+
+        icon_lbl.grid(row=0, column=0, padx=(10, 8), pady=6, sticky="w")
 
         name_label = ctk.CTkLabel(
             self,
-            text=f"{self.target.name}",
-            font=ctk.CTkFont(size=13, weight="bold"),
-            anchor="w"
+            text=self.target.name,
+            font=ctk.CTkFont(size=12, weight="bold"),
+            anchor="w",
+            text_color="#E0E0E0"
         )
-        name_label.pack(side="left", padx=4, pady=8)
+        name_label.grid(row=0, column=1, padx=4, pady=6, sticky="w")
 
         type_badge = ctk.CTkLabel(
             self,
             text=f" {self.target.target_type} ",
             font=ctk.CTkFont(size=10, weight="bold"),
-            fg_color=brand_color,
-            corner_radius=4
+            fg_color=self.target.brand_color,
+            corner_radius=4,
+            text_color="#FFFFFF"
         )
-        type_badge.pack(side="left", padx=6, pady=8)
+        type_badge.grid(row=0, column=2, padx=6, pady=6)
 
         if not self.target.is_installed:
             status_text = "Not Found"
-            status_color = "#37474F"
+            status_bg = "#263238"
+            status_fg = "#90A4AE"
         elif self.target.is_patched:
             status_text = "🟢 Patched"
-            status_color = "#1B5E20"
+            status_bg = "#1B5E20"
+            status_fg = "#81C784"
         else:
             status_text = "🟡 Unpatched"
-            status_color = "#E65100"
+            status_bg = "#E65100"
+            status_fg = "#FFB74D"
 
         status_label = ctk.CTkLabel(
             self,
             text=f" {status_text} ",
             font=ctk.CTkFont(size=10, weight="bold"),
-            fg_color=status_color,
+            fg_color=status_bg,
+            text_color=status_fg,
             corner_radius=4
         )
-        status_label.pack(side="left", padx=6, pady=8)
+        status_label.grid(row=0, column=3, padx=6, pady=6)
 
         if self.target.is_installed:
             btn_text = "Unpatch" if self.target.is_patched else "Patch"
-            btn_color = "#D32F2F" if self.target.is_patched else "#2E7D32"
+            btn_color = "#C62828" if self.target.is_patched else "#2E7D32"
             btn_hover = "#B71C1C" if self.target.is_patched else "#1B5E20"
 
             action_btn = ctk.CTkButton(
                 self,
                 text=btn_text,
-                width=75,
-                height=26,
+                width=70,
+                height=24,
                 fg_color=btn_color,
                 hover_color=btn_hover,
                 font=ctk.CTkFont(size=11, weight="bold"),
                 command=lambda: self.on_patch_click(self.target)
             )
-            action_btn.pack(side="right", padx=12, pady=8)
+            action_btn.grid(row=0, column=4, padx=(6, 10), pady=6, sticky="e")
 
 class ProxyManagerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("AI Coders Proxy Fixer v2.1.0 - Real AI Matrix Dashboard")
-        self.geometry("700x900")
+        self.title("AI Coders Proxy Fixer v2.1.0")
+        self.geometry("720x920")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.quit_app)
 
@@ -282,16 +318,17 @@ class ProxyManagerApp(ctk.CTk):
 
         self.setup_ui()
         self.setup_icon()
-        
-        # Trigger Cyberpunk Scanner Animation on first launch
-        self.after(200, self.trigger_scanner_animation)
+        self.setup_tray()
+
+        # Trigger Cyberpunk Scanner Animation centered over window
+        self.after(300, self.trigger_scanner_animation)
 
     def trigger_scanner_animation(self):
         CyberpunkScannerOverlay(self, self.rescan_targets)
 
     def setup_ui(self):
         # 1. Header Banner
-        header_banner = ctk.CTkFrame(self, fg_color="#12121A", corner_radius=0, height=75)
+        header_banner = ctk.CTkFrame(self, fg_color="#101018", corner_radius=0, height=75)
         header_banner.pack(fill="x", side="top")
 
         header_content = ctk.CTkFrame(header_banner, fg_color="transparent")
@@ -322,11 +359,8 @@ class ProxyManagerApp(ctk.CTk):
         badge_box = ctk.CTkFrame(header_content, fg_color="transparent")
         badge_box.pack(side="right")
 
-        badge_row = ctk.CTkFrame(badge_box, fg_color="transparent")
-        badge_row.pack(anchor="e", pady=(0, 4))
-
         ver_badge = ctk.CTkLabel(
-            badge_row,
+            badge_box,
             text=" v2.1.0 ",
             font=ctk.CTkFont(size=11, weight="bold"),
             fg_color="#311B92",
@@ -335,7 +369,7 @@ class ProxyManagerApp(ctk.CTk):
         ver_badge.pack(side="left", padx=(0, 6))
 
         about_btn = ctk.CTkButton(
-            badge_row,
+            badge_box,
             text="ℹ️ About",
             width=65,
             height=22,
@@ -351,7 +385,7 @@ class ProxyManagerApp(ctk.CTk):
         main_content.pack(fill="both", expand=True, padx=20, pady=10)
 
         # 2. Main Toggle Card
-        toggle_card = ctk.CTkFrame(main_content, fg_color="#181824", corner_radius=12, border_width=1, border_color="#262636")
+        toggle_card = ctk.CTkFrame(main_content, fg_color="#181824", corner_radius=12, border_width=1, border_color="#262638")
         toggle_card.pack(fill="x", pady=(0, 10))
 
         toggle_inner = ctk.CTkFrame(toggle_card, fg_color="transparent")
@@ -363,15 +397,15 @@ class ProxyManagerApp(ctk.CTk):
         self.status_title = ctk.CTkLabel(
             status_left,
             text="System Proxy Status",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#8E8EA0"
         )
         self.status_title.pack(anchor="w")
 
         self.status_desc = ctk.CTkLabel(
             status_left,
-            text="WinInet Router: Disabled",
-            font=ctk.CTkFont(size=15, weight="bold"),
+            text="WinInet Router: Disabled 🔴",
+            font=ctk.CTkFont(size=14, weight="bold"),
             text_color="#FF5252"
         )
         self.status_desc.pack(anchor="w")
@@ -392,8 +426,8 @@ class ProxyManagerApp(ctk.CTk):
         preset_row = ctk.CTkFrame(toggle_card, fg_color="transparent")
         preset_row.pack(fill="x", padx=16, pady=(0, 14))
 
-        preset_label = ctk.CTkLabel(preset_row, text="Proxy Preset:", font=ctk.CTkFont(size=11, weight="bold"), text_color="#8E8EA0")
-        preset_label.pack(side="left", padx=(0, 8))
+        preset_label = ctk.CTkLabel(preset_row, text="Preset:", font=ctk.CTkFont(size=11, weight="bold"), text_color="#8E8EA0")
+        preset_label.pack(side="left", padx=(0, 6))
 
         self.preset_dropdown = ctk.CTkOptionMenu(
             preset_row,
@@ -405,7 +439,7 @@ class ProxyManagerApp(ctk.CTk):
             button_color="#3A3A52",
             font=ctk.CTkFont(size=11)
         )
-        self.preset_dropdown.pack(side="left", padx=(0, 12))
+        self.preset_dropdown.pack(side="left", padx=(0, 10))
 
         self.ip_entry = ctk.CTkEntry(preset_row, width=110, height=26, font=ctk.CTkFont(size=11))
         self.ip_entry.insert(0, self.core.proxy_address)
@@ -454,7 +488,7 @@ class ProxyManagerApp(ctk.CTk):
         lat_grid.columnconfigure((0, 1, 2), weight=1)
 
         self.lat_cards = {}
-        endpoints = ["Anthropic API", "Google CloudCode", "Google Gemini", "OpenAI / Codex", "Cursor AI", "Codeium Backend"]
+        endpoints = ["Claude API", "Google Cloud Code", "Google Gemini", "OpenAI / Codex", "Cursor AI", "Codeium Backend"]
         for i, ep in enumerate(endpoints):
             row = i // 3
             col = i % 3
@@ -483,7 +517,7 @@ class ProxyManagerApp(ctk.CTk):
         )
         rescan_btn.pack(side="right")
 
-        self.targets_container = ctk.CTkScrollableFrame(main_content, height=270, corner_radius=10, fg_color="#12121A", border_width=1, border_color="#2A2A3C")
+        self.targets_container = ctk.CTkScrollableFrame(main_content, height=280, corner_radius=10, fg_color="#12121A", border_width=1, border_color="#2A2A3C")
         self.targets_container.pack(fill="x", pady=5)
 
         # 6. Footer Options
@@ -522,6 +556,43 @@ class ProxyManagerApp(ctk.CTk):
             except Exception:
                 pass
 
+    def generate_tray_icon_img(self):
+        icon_path = Path(__file__).parent.parent / "assets" / "app_icon.ico"
+        if not icon_path.exists() and getattr(sys, 'frozen', False):
+            icon_path = Path(sys._MEIPASS) / "assets" / "app_icon.ico"
+
+        if icon_path.exists():
+            try:
+                base_img = Image.open(str(icon_path)).convert('RGBA').resize((64, 64))
+                return base_img
+            except Exception:
+                pass
+
+        image = Image.new('RGB', (64, 64), (18, 18, 26))
+        dc = ImageDraw.Draw(image)
+        dc.rectangle((16, 16, 48, 48), fill=(0, 230, 118))
+        return image
+
+    def setup_tray(self):
+        icon_img = self.generate_tray_icon_img()
+        menu = (
+            item('Show Window', self.show_window),
+            item('Exit', self.quit_app)
+        )
+        self.tray_icon = pystray.Icon("AI Proxy Fixer", icon_img, "AI Proxy Fixer v2.1", menu)
+        def _tray_worker():
+            try:
+                self.tray_icon.run()
+            except Exception:
+                pass
+        t = threading.Thread(target=_tray_worker, daemon=True)
+        t.start()
+
+    def show_window(self, icon=None, item=None):
+        self.deiconify()
+        self.lift()
+        self.focus_force()
+
     def quit_app(self, icon=None, item=None):
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             try:
@@ -552,14 +623,17 @@ class ProxyManagerApp(ctk.CTk):
             if success:
                 self.is_proxy_enabled = True
                 self.status_desc.configure(text="WinInet Router: Active 🟢", text_color="#00E676")
+                ToastNotification(self, f"🟢 Proxy Enabled: {ip}:{port}", is_success=True)
             else:
                 self.main_switch.deselect()
                 self.status_desc.configure(text=f"Error: {msg}", text_color="#FF5252")
+                ToastNotification(self, f"🔴 Failed to enable proxy: {msg}", is_success=False)
         else:
             success, msg = self.core.disable_proxy()
             if success:
                 self.is_proxy_enabled = False
                 self.status_desc.configure(text="WinInet Router: Disabled 🔴", text_color="#FF5252")
+                ToastNotification(self, "🔴 System Proxy Disabled", is_success=False)
 
         self.run_latency_tests()
 
@@ -593,20 +667,26 @@ class ProxyManagerApp(ctk.CTk):
             self.stat_ports.update_val("No Port Active", "#FF5252")
             self.stat_active.update_val("Inactive", "#8E8EA0")
 
+        self.run_latency_tests()
+
     def on_patch_target(self, target: DetectedTarget):
         from patchers import TargetPatcher
         patcher = TargetPatcher(self.core.proxy_address, self.core.proxy_port)
 
         if target.is_patched:
             success, msg = patcher.unpatch_target(target.name, target.config_path)
+            if success:
+                ToastNotification(self, f"Unpatched {target.name}", is_success=True)
         else:
             success, msg = patcher.patch_target(target.name, target.config_path)
+            if success:
+                ToastNotification(self, f"Patched {target.name}", is_success=True)
 
         self.rescan_targets()
 
     def run_latency_tests(self):
         def _test_thread():
-            results = self.core.test_all_latencies()
+            results = self.core.test_api_latency()
             for ep_name, (ms, status) in results.items():
                 if ep_name in self.lat_cards:
                     self.after(0, lambda card=self.lat_cards[ep_name], m=ms, s=status: card.set_latency_status(m, s))
@@ -615,18 +695,29 @@ class ProxyManagerApp(ctk.CTk):
 
     def show_about_dialog(self):
         about_win = ctk.CTkToplevel(self)
-        about_win.title("About Developer - AI Coders Proxy Fixer")
-        about_win.geometry("420x300")
+        about_win.title("About Developer")
+        about_win.geometry("420x280")
         about_win.resizable(False, False)
-        about_win.attributes("-topmost", True)
+        about_win.transient(self)
+        about_win.grab_set()
 
-        main_frame = ctk.CTkFrame(about_win, fg_color="#181824", corner_radius=12)
-        main_frame.pack(fill="both", expand=True, padx=15, pady=15)
+        # Center modal over parent window
+        self.update_idletasks()
+        mx = self.winfo_x()
+        my = self.winfo_y()
+        mw = self.winfo_width()
+        mh = self.winfo_height()
+        x = mx + (mw - 420) // 2
+        y = my + (mh - 280) // 2
+        about_win.geometry(f"420x280+{max(0, x)}+{max(0, y)}")
+
+        main_frame = ctk.CTkFrame(about_win, fg_color="#161622", corner_radius=12, border_width=1, border_color="#2A2A3C")
+        main_frame.pack(fill="both", expand=True, padx=12, pady=12)
 
         title = ctk.CTkLabel(main_frame, text="AI Coders Proxy Fixer", font=ctk.CTkFont(size=18, weight="bold"), text_color="#00E676")
         title.pack(pady=(15, 5))
 
-        ver = ctk.CTkLabel(main_frame, text="Version 2.1.0 (Cyberpunk Matrix Release)", font=ctk.CTkFont(size=11), text_color="#8E8EA0")
+        ver = ctk.CTkLabel(main_frame, text="Version 2.1.0 (Executive Release)", font=ctk.CTkFont(size=11), text_color="#8E8EA0")
         ver.pack(pady=(0, 15))
 
         dev_title = ctk.CTkLabel(main_frame, text="Developed with ❤️ by Vahid Valadi", font=ctk.CTkFont(size=13, weight="bold"))
