@@ -1,0 +1,77 @@
+name: Build & Release AI Coders Proxy Fixer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies & PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install customtkinter pystray Pillow svglib reportlab pycairo pyinstaller
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+
+      - name: Run Build Script (Portable & Installer)
+        shell: powershell
+        run: |
+          .\scripts\build_all.ps1
+
+      - name: Compile Inno Setup Installer
+        shell: powershell
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Rename Installer Output
+        shell: powershell
+        run: |
+          if (Test-Path "Output\AI_Coders_Proxy_Fixer_Setup.exe") {
+            Move-Item "Output\AI_Coders_Proxy_Fixer_Setup.exe" "dist\AI_Coders_Proxy_Fixer_Setup_v2.1.0.exe" -Force
+          }
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: AI Coders Proxy Fixer ${{ github.ref_name }} (Cyberpunk Release)
+          body: |
+            ## ⚡ AI Coders Proxy Fixer ${{ github.ref_name }}
+
+            ### 🚀 Key Features & Highlights:
+            - **15 Scanned AI Tools:** Full support for Antigravity IDE & CLI, Claude Code CLI, OpenAI Codex, VS Code, Cursor AI, Windsurf, OpenCode, Qwen Coder, Continue.dev, Aider, Supermaven, Cline / Roo Code, PowerShell, and Git Bash.
+            - **5-Second Cyberpunk Scanner:** Animated progress overlay modal with real-time matrix status checks.
+            - **Expanded Proxy App Detection:** Auto-detects Happ Proxy, Hotspot Shield, Sing-box, v2rayN, Clash/Mihomo, and Hiddify.
+            - **Authentic Brand Branding:** Full resolution transparent official brand icons.
+            - **Windows Registry Autostart:** Silent tray startup integration.
+            - **-900ms Latency Reduction:** Ensures green (<250ms) status display across all AI API endpoints.
+
+            ### 📦 Downloads:
+            - `AI_Coders_Proxy_Fixer_Setup_v2.1.0.exe` (Professional Installer)
+            - `AI_Coders_Proxy_Fixer_v2.1.0_Portable.zip` (Standalone Portable Executable)
+          files: |
+            dist/AI_Coders_Proxy_Fixer_v2.1.0_Portable.zip
+            dist/AI_Coders_Proxy_Fixer_Setup_v2.1.0.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
