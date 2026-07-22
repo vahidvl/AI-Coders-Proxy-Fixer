@@ -224,8 +224,12 @@ class TargetRowFrame(ctk.CTkFrame):
         self.setup_ui()
 
     def setup_ui(self):
-        # Strict Grid Columns: 0: Icon, 1: Name, 2: Type Badge, 3: Status, 4: Button
-        self.columnconfigure(1, weight=1)
+        # Aligned Grid Columns: 0: Icon, 1: Name, 2: Type Badge, 3: Status Badge, 4: Action Button
+        self.columnconfigure(0, weight=0, minsize=38)
+        self.columnconfigure(1, weight=1, minsize=160)
+        self.columnconfigure(2, weight=0, minsize=95)
+        self.columnconfigure(3, weight=0, minsize=110)
+        self.columnconfigure(4, weight=0, minsize=80)
 
         # Load PNG Brand Icon
         icon_path = Path(__file__).parent.parent / "assets" / "icons" / self.target.icon_name
@@ -234,15 +238,15 @@ class TargetRowFrame(ctk.CTkFrame):
 
         if icon_path.exists():
             try:
-                pil_img = Image.open(str(icon_path)).resize((22, 22), Image.Resampling.LANCZOS)
-                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(22, 22))
+                pil_img = Image.open(str(icon_path)).resize((24, 24), Image.Resampling.LANCZOS)
+                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(24, 24))
                 icon_lbl = ctk.CTkLabel(self, image=ctk_img, text="")
             except Exception:
                 icon_lbl = ctk.CTkLabel(self, text="💻", font=ctk.CTkFont(size=14))
         else:
             icon_lbl = ctk.CTkLabel(self, text="💻", font=ctk.CTkFont(size=14))
 
-        icon_lbl.grid(row=0, column=0, padx=(10, 8), pady=6, sticky="w")
+        icon_lbl.grid(row=0, column=0, padx=(10, 6), pady=6, sticky="w")
 
         name_label = ctk.CTkLabel(
             self,
@@ -255,13 +259,14 @@ class TargetRowFrame(ctk.CTkFrame):
 
         type_badge = ctk.CTkLabel(
             self,
-            text=f" {self.target.target_type} ",
+            text=self.target.target_type,
+            width=75,
             font=ctk.CTkFont(size=10, weight="bold"),
             fg_color=self.target.brand_color,
             corner_radius=4,
             text_color="#FFFFFF"
         )
-        type_badge.grid(row=0, column=2, padx=6, pady=6)
+        type_badge.grid(row=0, column=2, padx=4, pady=6)
 
         if not self.target.is_installed:
             status_text = "Not Found"
@@ -278,13 +283,14 @@ class TargetRowFrame(ctk.CTkFrame):
 
         status_label = ctk.CTkLabel(
             self,
-            text=f" {status_text} ",
+            text=status_text,
+            width=90,
             font=ctk.CTkFont(size=10, weight="bold"),
             fg_color=status_bg,
             text_color=status_fg,
             corner_radius=4
         )
-        status_label.grid(row=0, column=3, padx=6, pady=6)
+        status_label.grid(row=0, column=3, padx=4, pady=6)
 
         if self.target.is_installed:
             btn_text = "Unpatch" if self.target.is_patched else "Patch"

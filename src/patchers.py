@@ -21,7 +21,9 @@ class TargetPatcher:
             return False, "Target configuration path does not exist."
 
         try:
-            if "profile.ps1" in str(config_path):
+            if "Cline / Roo Code" in name:
+                return self.patch_cline_roo(config_path)
+            elif "profile.ps1" in str(config_path):
                 return self.patch_powershell(config_path)
             elif ".bashrc" in str(config_path):
                 return self.patch_bash(config_path)
@@ -42,7 +44,9 @@ class TargetPatcher:
             return True, f"{name} is already unpatched."
 
         try:
-            if "profile.ps1" in str(config_path) or ".bashrc" in str(config_path):
+            if "Cline / Roo Code" in name:
+                return self.unpatch_cline_roo(config_path)
+            elif "profile.ps1" in str(config_path) or ".bashrc" in str(config_path):
                 return self.unpatch_shell(config_path)
             elif ".claude.json" in str(config_path) or ".copilot-cli" in str(config_path) or ".opencode" in str(config_path) or ".qwen" in str(config_path) or ".supermaven" in str(config_path) or ".antigravity" in str(config_path):
                 return self.unpatch_json_cli(config_path)
@@ -54,6 +58,37 @@ class TargetPatcher:
                 return self.unpatch_ide(config_path, is_antigravity=("Antigravity" in name or "Antigravity" in str(config_path)))
         except Exception as e:
             return False, f"Failed to unpatch {name}: {str(e)}"
+
+    def patch_cline_roo(self, config_path: Path) -> Tuple[bool, str]:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        data = {}
+        if config_path.exists():
+            try:
+                content = config_path.read_text(encoding='utf-8')
+                if content.strip():
+                    data = json.loads(content)
+            except json.JSONDecodeError:
+                pass
+
+        data["cline.proxy"] = self.full_proxy_url
+        if "claude-dev.environmentVariables" not in data:
+            data["claude-dev.environmentVariables"] = {}
+        data["claude-dev.environmentVariables"]["HTTP_PROXY"] = self.full_proxy_url
+        data["claude-dev.environmentVariables"]["HTTPS_PROXY"] = self.full_proxy_url
+        config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
+        return True, "Successfully patched Cline / Roo Code settings"
+
+    def unpatch_cline_roo(self, config_path: Path) -> Tuple[bool, str]:
+        if not config_path.exists():
+            return True, "Config file does not exist."
+        try:
+            data = json.loads(config_path.read_text(encoding='utf-8'))
+            data.pop("cline.proxy", None)
+            data.pop("claude-dev.environmentVariables", None)
+            config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
+            return True, "Successfully unpatched Cline / Roo Code settings"
+        except Exception as e:
+            return False, f"Failed to unpatch Cline / Roo Code: {str(e)}"
 
     def patch_ide(self, config_path: Path, is_antigravity: bool = False) -> Tuple[bool, str]:
         config_path.parent.mkdir(parents=True, exist_ok=True)
