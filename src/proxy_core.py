@@ -69,15 +69,29 @@ class ProxyManagerCore:
             return False, f"Failed to enable proxy: {str(e)}"
 
     def disable_proxy(self) -> Tuple[bool, str]:
-        """Disables all proxies and restores defaults."""
+        """Disables proxies added by this app - does NOT remove System Proxy if v2rayN/another proxy is running."""
         try:
             self._clear_env_vars()
-            self._clear_system_proxy()
+            # Only clear System Proxy if NO external proxy (v2rayN, Happ, Clash) is currently running.
+            # This prevents us from wiping v2rayN's system proxy setting.
+            if not self._is_external_proxy_running():
+                self._clear_system_proxy()
             self._clear_git_proxy()
             self.unpatch_all_detected()
             return True, "Proxy successfully disabled. Direct connection restored."
         except Exception as e:
             return False, f"Failed to disable proxy: {str(e)}"
+
+    def _is_external_proxy_running(self) -> bool:
+        """Check if an external proxy app (v2rayN, Clash, Happ, etc.) is actively listening."""
+        import socket
+        proxy_ports = [10808, 7890, 2080, 10809, 3080, 1080, 7897, 1070]
+        for port in proxy_ports:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.1)
+                if s.connect_ex(('127.0.0.1', port)) == 0:
+                    return True
+        return False
 
     def patch_all_detected(self) -> List[Tuple[str, bool, str]]:
         results = []
