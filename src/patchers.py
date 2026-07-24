@@ -109,9 +109,12 @@ class TargetPatcher:
         if is_antigravity:
             if "codeiumDev.languageServerEnv" not in data:
                 data["codeiumDev.languageServerEnv"] = {}
-            data["codeiumDev.languageServerEnv"]["HTTPS_PROXY"] = self.socks_proxy_url
-            data["codeiumDev.languageServerEnv"]["HTTP_PROXY"] = self.socks_proxy_url
+            # Use http:// (NOT socks5h://) for stable DNS resolution with v2rayN/xray
+            data["codeiumDev.languageServerEnv"]["HTTPS_PROXY"] = self.full_proxy_url
+            data["codeiumDev.languageServerEnv"]["HTTP_PROXY"] = self.full_proxy_url
             data["codeiumDev.languageServerEnv"]["NO_PROXY"] = self.no_proxy_list
+        # Disable strict SSL to prevent certificate rejection when going through proxy
+        data['http.proxyStrictSSL'] = False
 
         config_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
         return True, f"Successfully patched IDE settings at {config_path.name}"
